@@ -23,7 +23,7 @@
  *
  * @category   Shopware
  * @package   Shopware_Plugins
- * @subpackage SwagUnlockMerchants
+ * @subpackage SwagBrowserLanguage
  * @copyright  Copyright (c) 2012, shopware AG (http://www.shopware.de)
  */
 class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_Components_Plugin_Bootstrap
@@ -59,9 +59,44 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
      */
     public function install()
     {
+        $this->createConfiguration();
         $this->registerController();
 
         return true;
+    }
+
+    /**
+     * Creates the configuration fields.
+     * Selects first a row of the s_articles_attributes to get all possible article attributes.
+     */
+    private function createConfiguration()
+    {
+        $subshops = $this->getSubshops();
+
+        $store = array();
+
+        foreach ($subshops as $key => $subshop) {
+            $store[] = array($subshop['id'], $subshop['name']);
+        }
+
+        $form = $this->Form();
+
+        $form->setElement(
+            'select',
+            'default',
+            array(
+                'label' => 'Default-Subshop',
+                'store' => $store,
+                'required' => true,
+                'value' => $subshops[0]['id']
+            )
+        );
+
+        $form->setElement(
+            'checkbox',
+            'infobox',
+            array('label' => 'Hinweis anzeigen')
+        );
     }
 
     /**
@@ -75,7 +110,6 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
         );
         return true;
     }
-
 
 
     /**
@@ -95,9 +129,18 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
      */
     public function onEnlightControllerFrontStartDispatch(Enlight_Event_EventArgs $arguments)
     {
-        if (empty($_COOKIE['shop']))
-        {
-            $languages = $this->getBrowserLanguages();
+        /** @var $enlightController Enlight_Controller_Front */
+        $enlightController = $arguments->getSubject();
+
+        $response = $enlightController->Response();
+
+        /** @var $response Enlight_Controller_Request_RequestHttp */
+        $request = $enlightController->Request();
+
+        $subshopId = $request->getCookie('shop');
+
+        if (empty($subshopId)) {
+            $languages = $this->getBrowserLanguages($request);
             $subshops = $this->getSubshops();
 
             $_COOKIE['shop'] = $this->getSubshopId($languages, $subshops);
@@ -106,46 +149,51 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
 
     /**
      * Helper function to get all prefered browser languages
-     * @return array
+     * @param Enlight_Controller_Request_RequestHttp $request
+     * @return array|mixed
      */
-    private function getBrowserLanguages()
+    private function getBrowserLanguages(Enlight_Controller_Request_RequestHttp $request)
     {
-        $languages = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
+        $languages = $request->getServer('HTTP_ACCEPT_LANGUAGE');
         $languages = explode(',', $languages);
 
-        foreach($languages as $key => $language)
-        {
+        foreach ($languages as $key => $language) {
             $language = explode(';', $language);
             $languages[$key] = $language[0];
         }
 
-        return($languages);
+        return $languages;
     }
 
     /**
-     * Helper function to get the ids and languages of all active subshops
+     * Helper function to get the needed data of all active subshops
      * @return array
      */
     private function getSubshops()
     {
-        $sql = "SELECT s_core_shops.id, s_core_locales.locale
-                FROM   s_core_shops, s_core_locales
-                WHERE  s_core_locales.id = s_core_shops.locale_id
-                AND    s_core_shops.active = 1
-                ORDER BY s_core_shops.default DESC";
-        $subshops = Shopware()->Db()->fetchAll($sql);
+        $repository = Shopware()->Models()->getRepository('Shopware\Models\Shop\Shop');
+        $builder = $repository->getActiveQueryBuilder();
+        $builder->orderBy('shop.default', 'DESC');
+        $data = $builder->getQuery()->getArrayResult();
 
-        foreach($subshops as $key => $subshop)
-        {
-            $subshop['locale'] = strtolower($subshop['locale']);
+        $subshops = array();
+
+        foreach ($data as $subshop) {
+            $subshop['locale'] = strtolower($subshop['locale']['locale']);
             $subshop['locale'] = str_replace('_', '-', $subshop['locale']);
+
             $subshop['language'] = explode('-', $subshop['locale']);
             $subshop['language'] = $subshop['language'][0];
 
-            $subshops[$key] = $subshop;
+            $subshops[] = array(
+                'id' => $subshop['id'],
+                'name' => $subshop['name'],
+                'locale' => $subshop['locale'],
+                'language' => $subshop['language']
+            );
         }
 
-        return($subshops);
+        return $subshops;
     }
 
     /**
@@ -156,22 +204,25 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
      */
     private function getSubshopId($languages, $subshops)
     {
-        foreach($languages as $language)
-        {
-            foreach($subshops as $subshop)
-            {
-                if($language === $subshop['locale'])
-                {
-                   return($subshop['id']);
+        foreach ($languages as $language) {
+            foreach ($subshops as $subshop) {
+                if ($language === $subshop['locale']) {
+                    return ($subshop['id']);
                 }
 
-                if ($language === $subshop['language'])
-                {
-                    return($subshop['id']);
+                if ($language === $subshop['language']) {
+                    return ($subshop['id']);
                 }
             }
         }
 
-        return($subshops[0]['id']);
+        $default = $this->Config()->get('default');
+
+        if(!is_int($default))
+        {
+            $default = $subshops[0]['id'];
+        }
+
+        return ($default);
     }
 }
