@@ -130,12 +130,15 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
      */
     public function uninstall()
     {
+        $this->removeSnippets();
+
         return true;
     }
 
     /**
      * Event listener function of the Enlight_Controller_Front_RouteShutdown event.
      * Redirect to language subshop if is not set in cookie
+     * If the correct language subshop is the default shop, nothing happens
      * @param Enlight_Controller_EventArgs $args
      */
     public function onRouteShutdown(Enlight_Controller_EventArgs $args)
@@ -150,6 +153,11 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
             $subshops = $this->getSubshops();
 
             $subshopId = $this->getSubshopId($languages, $subshops);
+
+            if($subshopId == $subshops[0]['id']) {
+                return;
+            }
+
             $this->redirectToSubshop($subshopId, $request, $response);
 
             if ($this->Config()->get('infobox')) {

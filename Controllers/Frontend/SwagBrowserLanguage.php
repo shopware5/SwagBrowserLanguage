@@ -27,6 +27,9 @@
  */
 class Shopware_Controllers_Frontend_SwagBrowserLanguage extends Enlight_Controller_Action
 {
+    /**
+     * Controller Action to redirect to the default shop
+     */
     public function indexAction()
     {
         $response = $this->Response();
