@@ -28,7 +28,7 @@
  */
 class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_Components_Plugin_Bootstrap
 {
-    /**
+   /**
      * Returns an array with the capabilities of the plugin.
      * @return array
      */
@@ -105,9 +105,20 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
     public function registerController()
     {
         $this->subscribeEvent(
-            'Enlight_Controller_Front_StartDispatch',
-            'onEnlightControllerFrontStartDispatch'
+            'Enlight_Controller_Dispatcher_ControllerPath_Frontend_SwagBrowserLanguage',
+            'onGetFrontendController'
         );
+
+        $this->subscribeEvent(
+            'Enlight_Controller_Front_RouteShutdown',
+            'onRouteShutdown'
+        );
+
+        $this->subscribeEvent(
+            'Enlight_Controller_Action_PostDispatch',
+            'onPostDispatchFrontend'
+        );
+
         return true;
     }
 
@@ -123,19 +134,14 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
     }
 
     /**
-     * Event listener function of the Enlight_Controller_Front_StartDispatch event.
-     * Set the subshop id in the cookie if it is unset.
-     * @param Enlight_Event_EventArgs $arguments
+     * Event listener function of the Enlight_Controller_Front_RouteShutdown event.
+     * Redirect to language subshop if is not set in cookie
+     * @param Enlight_Controller_EventArgs $args
      */
-    public function onEnlightControllerFrontStartDispatch(Enlight_Event_EventArgs $arguments)
+    public function onRouteShutdown(Enlight_Controller_EventArgs $args)
     {
-        /** @var $enlightController Enlight_Controller_Front */
-        $enlightController = $arguments->getSubject();
-
-        $response = $enlightController->Response();
-
-        /** @var $response Enlight_Controller_Request_RequestHttp */
-        $request = $enlightController->Request();
+        $request = $args->getRequest();
+        $response = $args->getResponse();
 
         $subshopId = $request->getCookie('shop');
 
@@ -143,7 +149,20 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
             $languages = $this->getBrowserLanguages($request);
             $subshops = $this->getSubshops();
 
-            $_COOKIE['shop'] = $this->getSubshopId($languages, $subshops);
+            $subshopId = $this->getSubshopId($languages, $subshops);
+            $this->redirectToSubshop($subshopId, $request, $response);
+
+            if ($this->Config()->get('infobox')) {
+                $header = $response->getHeaders();
+                $url = sprintf(
+                    '%s?%s=%d',
+                    $header['value'],
+                    'show_modal',
+                    1
+                );
+
+                $response->setRedirect($url);
+            }
         }
     }
 
@@ -224,5 +243,88 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
         }
 
         return ($default);
+    }
+
+    /**
+     * Helper function to create a redirect to a subshop
+     * @param $subshopId
+     * @param $request
+     * @param $response
+     */
+    private function redirectToSubshop($subshopId, $request, $response)
+    {
+        $repository = Shopware()->Models()->getRepository('Shopware\Models\Shop\Shop');
+        $newShop = $repository->getActiveById($subshopId);
+        $path = rtrim($newShop->getBasePath(), '/') . '/';
+        $response->setCookie('shop', $subshopId, 0, $path);
+        $url = sprintf('%s://%s%s%s',
+            $request::SCHEME_HTTP,
+            $newShop->getHost(),
+            $newShop->getBaseUrl(),
+            '/'
+        );
+
+        $response->setRedirect($url);
+    }
+
+    /**
+     * Event listener function of the Enlight_Controller_Action_PostDispatch event.
+     * @param Enlight_Event_EventArgs $arguments
+     */
+    public function onPostDispatchFrontend(Enlight_Event_EventArgs $arguments)
+    {
+        /**@var $controller Shopware_Controllers_Frontend_Index */
+        $controller = $arguments->getSubject();
+
+        /**
+         * @var $request Zend_Controller_Request_Http
+         */
+        $request = $controller->Request();
+
+        /**
+         * @var $response Zend_Controller_Response_Http
+         */
+        $response = $controller->Response();
+
+        /**
+         * @var $view Enlight_View_Default
+         */
+        $view = $controller->View();
+
+        //Check if there is a template and if an exception has occured
+        if (!$request->isDispatched() || $response->isException() || !$view->hasTemplate() || $request->getModuleName(
+            ) != "frontend"
+        ) {
+            return;
+        }
+
+        //Add our plugin template directory to load our slogan extension.
+        $view->addTemplateDir($this->Path() . 'Views/');
+
+        $view->extendsTemplate('frontend/plugins/swag_browser_language/index.tpl');
+
+        $show_modal = (int)$request->getParam('show_modal');
+        if($show_modal)
+        {
+            $view->assign('show_modal', $request->getBasePath().$request->getPathInfo());
+        }
+    }
+
+    /**
+     * Returns the path to the frontend controller.
+     *
+     * @return string
+     */
+    public function onGetFrontendController()
+    {
+        $this->Application()->Snippets()->addConfigDir(
+            $this->Path() . 'Snippets/'
+        );
+
+        $this->Application()->Template()->addTemplateDir(
+            $this->Path() . 'Views/'
+        );
+
+        return $this->Path(). 'Controllers/Frontend/SwagBrowserLanguage.php';
     }
 }
