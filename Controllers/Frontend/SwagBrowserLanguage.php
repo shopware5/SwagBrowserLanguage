@@ -22,7 +22,7 @@
  * our trademarks remain entirely with us.
  *
  * @category   Shopware
- * @package    Shopware_Controllers_Frontend_SwagVariantsTab
+ * @package    Shopware_Controllers_Frontend_SwagBrowserLanguage
  * @copyright  Copyright (c) 2013, shopware AG (http://www.shopware.de)
  */
 class Shopware_Controllers_Frontend_SwagBrowserLanguage extends Enlight_Controller_Action
@@ -35,15 +35,15 @@ class Shopware_Controllers_Frontend_SwagBrowserLanguage extends Enlight_Controll
         $response = $this->Response();
         $request = $this->Request();
 
+        /** @var \Shopware\Models\Shop\Repository $repository */
         $repository = Shopware()->Models()->getRepository('Shopware\Models\Shop\Shop');
         $newShop = $repository->getActiveDefault();
         $path = rtrim($newShop->getBasePath(), '/') . '/';
         $response->setCookie('shop', $newShop->getId(), 0, $path);
-        $url = sprintf('%s://%s%s%s',
+        $url = sprintf('%s://%s%s/',
             $request::SCHEME_HTTP,
             $newShop->getHost(),
-            $newShop->getBaseUrl(),
-            '/'
+            $newShop->getBaseUrl()
         );
 
         $response->setRedirect($url);

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Shopware 4.0
  * Copyright © 2012 shopware AG
@@ -28,7 +29,7 @@
  */
 class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_Components_Plugin_Bootstrap
 {
-   /**
+    /**
      * Returns an array with the capabilities of the plugin.
      * @return array
      */
@@ -42,12 +43,35 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
     }
 
     /**
+     * Returns the name of the plugin.
+     * @return string
+     */
+    public function getLabel()
+    {
+        return 'Browsersprachen-Weiterleitung';
+    }
+
+    /**
      * Returns the current version of the plugin.
      * @return string
      */
     public function getVersion()
     {
         return "1.0.0";
+    }
+
+    /**
+     * Returns an array with some informations about the plugin.
+     * @return array
+     */
+    public function getInfo()
+    {
+        return array(
+            'version' => $this->getVersion(),
+            'label' => $this->getLabel(),
+            'description' => file_get_contents($this->Path() . 'info.txt'),
+            'link' => 'http://www.shopware.de/'
+        );
     }
 
     /**
@@ -88,14 +112,16 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
                 'label' => 'Default-Subshop',
                 'store' => $store,
                 'required' => true,
-                'value' => $subshops[0]['id']
+                'value' => $subshops[0]['id'],
+                'description' => 'Auf diesen Shop wird weitergeleitet, wenn kein zu den Browsersprachen passender Shop existiert.'
             )
         );
 
         $form->setElement(
             'checkbox',
             'infobox',
-            array('label' => 'Hinweis anzeigen')
+            array('label' => 'Hinweis anzeigen',
+                'description' => 'Wenn aktiviert, wird dem Kunden nach Weiterleitung eine kleine Infobox angezeigt mit der Option zum Hauptshop zurückzukehren.')
         );
     }
 
@@ -154,23 +180,17 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
 
             $subshopId = $this->getSubshopId($languages, $subshops);
 
-            if($subshopId == $subshops[0]['id']) {
+            if ($subshopId == $subshops[0]['id']) {
                 return;
             }
 
-            $this->redirectToSubshop($subshopId, $request, $response);
+            $params = '';
 
             if ($this->Config()->get('infobox')) {
-                $header = $response->getHeaders();
-                $url = sprintf(
-                    '%s?%s=%d',
-                    $header['value'],
-                    'show_modal',
-                    1
-                );
-
-                $response->setRedirect($url);
+                $params = sprintf('?%s=%d', 'show_modal', 1);
             }
+
+            $this->redirectToSubshop($subshopId, $request, $response, $params);
         }
     }
 
@@ -198,6 +218,7 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
      */
     private function getSubshops()
     {
+        /** @var \Shopware\Models\Shop\Repository $repository */
         $repository = Shopware()->Models()->getRepository('Shopware\Models\Shop\Shop');
         $builder = $repository->getActiveQueryBuilder();
         $builder->orderBy('shop.default', 'DESC');
@@ -245,8 +266,7 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
 
         $default = $this->Config()->get('default');
 
-        if(!is_int($default))
-        {
+        if (!is_int($default)) {
             $default = $subshops[0]['id'];
         }
 
@@ -259,17 +279,19 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
      * @param $request
      * @param $response
      */
-    private function redirectToSubshop($subshopId, $request, $response)
+    private function redirectToSubshop($subshopId, $request, $response, $params)
     {
+        /** @var \Shopware\Models\Shop\Repository $repository */
         $repository = Shopware()->Models()->getRepository('Shopware\Models\Shop\Shop');
         $newShop = $repository->getActiveById($subshopId);
         $path = rtrim($newShop->getBasePath(), '/') . '/';
         $response->setCookie('shop', $subshopId, 0, $path);
-        $url = sprintf('%s://%s%s%s',
+        $url = sprintf(
+            '%s://%s%s/%s',
             $request::SCHEME_HTTP,
             $newShop->getHost(),
             $newShop->getBaseUrl(),
-            '/'
+            $params
         );
 
         $response->setRedirect($url);
@@ -281,22 +303,16 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
      */
     public function onPostDispatchFrontend(Enlight_Event_EventArgs $arguments)
     {
-        /**@var $controller Shopware_Controllers_Frontend_Index */
+        /** @var $controller Shopware_Controllers_Frontend_Index */
         $controller = $arguments->getSubject();
 
-        /**
-         * @var $request Zend_Controller_Request_Http
-         */
+        /** @var $request Zend_Controller_Request_Http */
         $request = $controller->Request();
 
-        /**
-         * @var $response Zend_Controller_Response_Http
-         */
+        /** @var $response Zend_Controller_Response_Http */
         $response = $controller->Response();
 
-        /**
-         * @var $view Enlight_View_Default
-         */
+        /** @var $view Enlight_View_Default */
         $view = $controller->View();
 
         //Check if there is a template and if an exception has occured
@@ -312,9 +328,9 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
         $view->extendsTemplate('frontend/plugins/swag_browser_language/index.tpl');
 
         $show_modal = (int)$request->getParam('show_modal');
-        if($show_modal)
-        {
-            $view->assign('show_modal', $request->getBasePath().$request->getPathInfo());
+
+        if ($show_modal) {
+            $view->assign('show_modal', $request->getBasePath() . $request->getPathInfo());
         }
     }
 
@@ -333,6 +349,6 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
             $this->Path() . 'Views/'
         );
 
-        return $this->Path(). 'Controllers/Frontend/SwagBrowserLanguage.php';
+        return $this->Path() . 'Controllers/Frontend/SwagBrowserLanguage.php';
     }
 }
