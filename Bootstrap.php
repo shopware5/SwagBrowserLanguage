@@ -109,7 +109,7 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
             'select',
             'default',
             array(
-                'label' => 'Default-Subshop',
+                'label' => 'Fallback-Sprachshop',
                 'store' => $store,
                 'required' => true,
                 'value' => $subshops[0]['id'],
