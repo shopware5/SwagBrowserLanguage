@@ -48,7 +48,7 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
      */
     public function getLabel()
     {
-        return 'Browsersprachen-Weiterleitung';
+        return 'Automatische Sprachshop-Auswahl';
     }
 
     /**
