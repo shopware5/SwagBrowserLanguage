@@ -33,18 +33,11 @@ class Shopware_Controllers_Frontend_SwagBrowserLanguage extends Enlight_Controll
     public function indexAction()
     {
         $response = $this->Response();
-        $request = $this->Request();
+        $newShop = Shopware()->Shop()->getMain();
 
-        /** @var \Shopware\Models\Shop\Repository $repository */
-        $repository = Shopware()->Models()->getRepository('Shopware\Models\Shop\Shop');
-        $newShop = $repository->getActiveDefault();
         $path = rtrim($newShop->getBasePath(), '/') . '/';
         $response->setCookie('shop', $newShop->getId(), 0, $path);
-        $url = sprintf('%s://%s%s/',
-            $request::SCHEME_HTTP,
-            $newShop->getHost(),
-            $newShop->getBaseUrl()
-        );
+        $url = $this->Front()->Router()->assemble(array('controller' => 'index'));
 
         $response->setRedirect($url);
     }
