@@ -4,8 +4,8 @@
 <br>
 <ul>
             <li>1. Die gegenwärtig geprüfte Browsersprache entspricht dem Hauptshop<br>-> keine Weiterleitung</li>
-            <li>2. Die gegenwärtig geprüfte Browsersprache entspricht einem Sprachshop<br>-> Weiterleitung auf den entsprechenden Subshop</li>
-            <li>3. Keine der Browsersprachen entspricht einem Sprachshop<br>-> Weiterleitung auf den in der Pluginkonfiguration eingestellten Default-Shop, sofern dieser nicht dem Hauptshop entspricht, sonst keine Weiterleitung</li>
+            <li>2. Die gegenwärtig geprüfte Browsersprache entspricht einem Sprachshop<br>-> Weiterleitung auf den entsprechenden Sprachshop</li>
+            <li>3. Keine der Browsersprachen entspricht einem Sprachshop<br>-> Weiterleitung auf den in der Pluginkonfiguration eingestellten Fallback-Sprachshop, sofern dieser nicht dem Hauptshop entspricht, sonst keine Weiterleitung</li>
 </ul>
 <br>
 <p>Sobald zu einer Sprache ein passender Shop gefunden wurde, wird die weitere Suche beendet.</p>

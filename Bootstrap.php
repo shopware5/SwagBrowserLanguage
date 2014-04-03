@@ -57,7 +57,7 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
      */
     public function getVersion()
     {
-        return "1.0.0";
+        return "1.0.1";
     }
 
     /**
@@ -95,11 +95,11 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
      */
     private function createConfiguration()
     {
-        $subshops = $this->getSubshops();
+        $subshops = $this->getLanguageShops();
 
         $store = array();
 
-        foreach ($subshops as $key => $subshop) {
+        foreach ($subshops as $subshop) {
             $store[] = array($subshop['id'], $subshop['name']);
         }
 
@@ -111,6 +111,7 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
             array(
                 'label' => 'Fallback-Sprachshop',
                 'store' => $store,
+                'scope' => Shopware\Models\Config\Element::SCOPE_SHOP,
                 'required' => true,
                 'value' => $subshops[0]['id'],
                 'description' => 'Auf diesen Shop wird weitergeleitet, wenn kein zu den Browsersprachen passender Shop existiert.'
@@ -120,7 +121,9 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
         $form->setElement(
             'checkbox',
             'infobox',
-            array('label' => 'Hinweis anzeigen',
+            array(
+                'label' => 'Hinweis anzeigen',
+                'scope' => Shopware\Models\Config\Element::SCOPE_SHOP,
                 'description' => 'Wenn aktiviert, wird dem Kunden nach Weiterleitung eine kleine Infobox angezeigt mit der Option zum Hauptshop zurückzukehren.')
         );
     }
@@ -171,27 +174,34 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
     {
         $request = $args->getRequest();
         $response = $args->getResponse();
+        $module = $request->getModuleName();
+
+        if (!(empty($module) || $module === 'frontend')) {
+            return;
+        }
 
         $subshopId = $request->getCookie('shop');
 
-        if (empty($subshopId)) {
-            $languages = $this->getBrowserLanguages($request);
-            $subshops = $this->getSubshops();
-
-            $subshopId = $this->getSubshopId($languages, $subshops);
-
-            if ($subshopId == $subshops[0]['id']) {
-                return;
-            }
-
-            $params = '';
-
-            if ($this->Config()->get('infobox')) {
-                $params = sprintf('?%s=%d', 'show_modal', 1);
-            }
-
-            $this->redirectToSubshop($subshopId, $request, $response, $params);
+        if ($subshopId) {
+            return;
         }
+
+        $languages = $this->getBrowserLanguages($request);
+        $subshops = $this->getLanguageShops(Shopware()->Shop()->getId());
+
+        $subshopId = $this->getSubshopId($languages, $subshops);
+
+        if ($subshopId == $subshops[0]['id']) {
+            return;
+        }
+
+        $params = '';
+
+        if ($this->Config()->get('infobox')) {
+            $params = sprintf('?%s=%d', 'show_modal', 1);
+        }
+
+        $this->redirectToSubshop($subshopId, $request, $response, $params);
     }
 
     /**
@@ -213,15 +223,24 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
     }
 
     /**
-     * Helper function to get the needed data of all active subshops
+     * Helper function to get the needed data of all active language shops (optional: of a main shop)
      * @return array
      */
-    private function getSubshops()
+    private function getLanguageShops($mainShopId = 0)
     {
         /** @var \Shopware\Models\Shop\Repository $repository */
         $repository = Shopware()->Models()->getRepository('Shopware\Models\Shop\Shop');
         $builder = $repository->getActiveQueryBuilder();
-        $builder->orderBy('shop.default', 'DESC');
+        $builder->orderBy('shop.id');
+
+        if($mainShopId > 0)
+        {
+            $builder->andWhere('shop.id = :mainShopId')
+                ->orWhere('shop.mainId = :mainShopId')
+                ->andWhere('shop.active = 1')
+                ->setParameter('mainShopId', $mainShopId);
+        }
+
         $data = $builder->getQuery()->getArrayResult();
 
         $subshops = array();
