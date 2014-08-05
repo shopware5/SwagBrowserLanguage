@@ -216,6 +216,14 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
 
         foreach ($languages as $key => $language) {
             $language = explode(';', $language);
+
+            //Internet explorer fix-->
+            if(strpos($language[0], '-')){
+               $languages[$key] = explode('-', $language[0])[0];
+               continue;
+            }
+            //<-- fix end
+
             $languages[$key] = $language[0];
         }
 
