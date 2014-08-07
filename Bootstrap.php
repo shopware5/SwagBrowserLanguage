@@ -57,7 +57,13 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
      */
     public function getVersion()
     {
-        return "1.0.1";
+        $info = json_decode(file_get_contents(__DIR__ . DIRECTORY_SEPARATOR .'plugin.json'), true);
+
+        if ($info) {
+            return $info['currentVersion'];
+        } else {
+            throw new Exception('The plugin has an invalid version file.');
+        }
     }
 
     /**
@@ -217,12 +223,18 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
         foreach ($languages as $key => $language) {
             $language = explode(';', $language);
 
-            //Internet explorer fix-->
             if(strpos($language[0], '-')){
-               $languages[$key] = explode('-', $language[0])[0];
-               continue;
+                $windowsLanguage = explode('-', $language[0]);
+                if(is_array($windowsLanguage)){
+                    $languageLocale = $windowsLanguage[0];
+                    $languages[$key] = $languageLocale;
+                }
+                else{
+                    //Should not happen
+                    $languages[$key] = $language[0];
+                }
+                continue;
             }
-            //<-- fix end
 
             $languages[$key] = $language[0];
         }
