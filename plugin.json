@@ -1,0 +1,14 @@
+{
+    "currentVersion": "1.0.2",
+
+    "changelogs": {
+        "1.0.2": "Fixed redirection in Internet Explorer 10+"
+    },
+
+    "compatibility": {
+        "minimumVersion": "4.1.0",
+        "maximumVersion": null,
+        "blacklist": [
+        ]
+    }
+}
