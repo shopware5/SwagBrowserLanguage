@@ -57,7 +57,7 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
      */
     public function getVersion()
     {
-        $info = json_decode(file_get_contents(__DIR__ . DIRECTORY_SEPARATOR .'plugin.json'), true);
+        $info = json_decode(file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'plugin.json'), true);
 
         if ($info) {
             return $info['currentVersion'];
@@ -90,7 +90,7 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
     public function install()
     {
         $this->createConfiguration();
-        $this->registerController();
+        $this->registerEvents();
 
         return true;
     }
@@ -137,7 +137,7 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
     /**
      * Registers the plugin controller event for the backend controller SwagUnlockMerchants
      */
-    public function registerController()
+    public function registerEvents()
     {
         $this->subscribeEvent(
             'Enlight_Controller_Dispatcher_ControllerPath_Frontend_SwagBrowserLanguage',
@@ -145,8 +145,8 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
         );
 
         $this->subscribeEvent(
-            'Enlight_Controller_Front_RouteShutdown',
-            'onRouteShutdown'
+            'Enlight_Controller_Action_PreDispatch',
+            'onPreDispatch'
         );
 
         $this->subscribeEvent(
@@ -171,18 +171,17 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
     }
 
     /**
-     * Event listener function of the Enlight_Controller_Front_RouteShutdown event.
+     * Event listener function of the Enlight_Controller_Action_PreDispatch event.
      * Redirect to language subshop if is not set in cookie
      * If the correct language subshop is the default shop, nothing happens
      * @param Enlight_Controller_EventArgs $args
      */
-    public function onRouteShutdown(Enlight_Controller_EventArgs $args)
+    public function onPreDispatch(Enlight_Controller_EventArgs $args)
     {
         $request = $args->getRequest();
         $response = $args->getResponse();
-        $module = $request->getModuleName();
 
-        if (!(empty($module) || $module === 'frontend')) {
+        if (!$this->allowRedirect($args->getSubject())) {
             return;
         }
 
@@ -223,13 +222,12 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
         foreach ($languages as $key => $language) {
             $language = explode(';', $language);
 
-            if(strpos($language[0], '-')){
+            if (strpos($language[0], '-')) {
                 $windowsLanguage = explode('-', $language[0]);
-                if(is_array($windowsLanguage)){
+                if (is_array($windowsLanguage)) {
                     $languageLocale = $windowsLanguage[0];
                     $languages[$key] = $languageLocale;
-                }
-                else{
+                } else {
                     //Should not happen
                     $languages[$key] = $language[0];
                 }
@@ -253,8 +251,7 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
         $builder = $repository->getActiveQueryBuilder();
         $builder->orderBy('shop.id');
 
-        if($mainShopId > 0)
-        {
+        if ($mainShopId > 0) {
             $builder->andWhere('shop.id = :mainShopId')
                 ->orWhere('shop.mainId = :mainShopId')
                 ->andWhere('shop.active = 1')
@@ -355,8 +352,7 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
         $view = $controller->View();
 
         //Check if there is a template and if an exception has occured
-        if (!$request->isDispatched() || $response->isException() || !$view->hasTemplate() || $request->getModuleName(
-            ) != "frontend"
+        if (!$request->isDispatched() || $response->isException() || !$view->hasTemplate() || $request->getModuleName() != "frontend"
         ) {
             return;
         }
@@ -390,4 +386,43 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
 
         return $this->Path() . 'Controllers/Frontend/SwagBrowserLanguage.php';
     }
+
+    /**
+     * Make sure that only useful redirects are performed
+     *
+     * @param Enlight_Controller_Action $controller
+     * @return bool
+     */
+    private function allowRedirect(\Enlight_Controller_Action $controller)
+    {
+        $request = $controller->Request();
+        $module = $request->getModuleName();
+        $controllerName = $request->getControllerName() ?: 'index';
+
+        $whitelist = array('detail', 'index', 'listing');
+
+        // Only process frontend requests
+        if ($module !== 'frontend') {
+            return false;
+        }
+
+        // check whitelist
+        if (!in_array($controllerName, $whitelist)) {
+            return false;
+        }
+
+        // don't redirect ajax request
+        if ($request->isXmlHttpRequest()) {
+            return false;
+        }
+
+        // don't redirect payment controllers
+        if ($controller instanceof \Shopware_Controllers_Frontend_Payment) {
+            return false;
+        }
+
+        return true;
+    }
+
+
 }
