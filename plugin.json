@@ -1,8 +1,24 @@
 {
-    "currentVersion": "1.0.2",
+    "label": {
+        "de": "Automatische Sprachshop-Auswahl",
+        "en": "Automated language shop detection"
+    },
+    "copyright": "(c) by Shopware AG",
+    "license": "proprietary",
+    "link": "http://store.shopware.com",
+    "author": "Shopware AG",
 
-    "changelogs": {
-        "1.0.2": "Fixed redirection in Internet Explorer 10+"
+    "currentVersion": "1.0.3",
+
+    "changelog": {
+        "de": {
+            "1.0.3": "Korrektur: Begrenzung der weitergeleiteten Requests",
+            "1.0.2": "Korrigiert Installations-Probleme"
+        },
+        "en": {
+            "1.0.3": "Fix: Limit kind of request which are redirected",
+            "1.0.2": "Fixes install problems"
+        }
     },
 
     "compatibility": {
