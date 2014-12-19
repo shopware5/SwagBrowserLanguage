@@ -221,19 +221,6 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
 
         foreach ($languages as $key => $language) {
             $language = explode(';', $language);
-
-//            if (strpos($language[0], '-')) {
-//                $windowsLanguage = explode('-', $language[0]);
-//                if (is_array($windowsLanguage)) {
-//                    $languageLocale = $windowsLanguage[0];
-//                    $languages[$key] = $languageLocale;
-//                } else {
-//                    //Should not happen
-//                    $languages[$key] = $language[0];
-//                }
-//                continue;
-//            }
-
             $languages[$key] = $language[0];
         }
         return $languages;
@@ -241,6 +228,8 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
 
     /**
      * Helper function to get the needed data of all active language shops (optional: of a main shop)
+     * 
+     * @param int $mainShopId
      * @return array
      */
     private function getLanguageShops($mainShopId = 0)
