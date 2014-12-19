@@ -221,27 +221,15 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
 
         foreach ($languages as $key => $language) {
             $language = explode(';', $language);
-
-            if (strpos($language[0], '-')) {
-                $windowsLanguage = explode('-', $language[0]);
-                if (is_array($windowsLanguage)) {
-                    $languageLocale = $windowsLanguage[0];
-                    $languages[$key] = $languageLocale;
-                } else {
-                    //Should not happen
-                    $languages[$key] = $language[0];
-                }
-                continue;
-            }
-
             $languages[$key] = $language[0];
         }
-
         return $languages;
     }
 
     /**
      * Helper function to get the needed data of all active language shops (optional: of a main shop)
+     * 
+     * @param int $mainShopId
      * @return array
      */
     private function getLanguageShops($mainShopId = 0)
@@ -276,37 +264,83 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
                 'language' => $subshop['language']
             );
         }
-
         return $subshops;
     }
 
     /**
      * Helper function to get the SubshopId of the Shop in the prefered language
      * @param $languages
-     * @param $subshops
+     * @param $subShops
      * @return mixed
      */
-    private function getSubshopId($languages, $subshops)
+    private function getSubshopId($languages, $subShops)
     {
-        foreach ($languages as $language) {
-            foreach ($subshops as $subshop) {
-                if ($language === $subshop['locale']) {
-                    return ($subshop['id']);
-                }
+        $subShopId = $this->getSubShopIdByFullBrowserLanguage($languages, $subShops);
+        if (!$subShopId) {
+            $subShopId = $this->getSubShopIdByBrowserLanguagePrefix($languages, $subShops);
+        }
+        if (!$subShopId) {
+            $subShopId = $this->getDefaultShopId($subShops);
+        }
+        return $subShopId;
+    }
 
-                if ($language === $subshop['language']) {
+    /**
+     * HelperMethod for getSubshopId... get the default ShopId
+     *
+     * @param $subShops
+     * @return int
+     */
+    private function getDefaultShopId($subShops) {
+        $default = $this->Config()->get('default');
+        if (!is_int($default)) {
+            $default = $subShops[0]['id'];
+        }
+        return ($default);
+    }
+
+    /**
+     * HelperMethod for getSubshopId... try to get the LanguageShop by the full BrowserLanguage like [de-DE] or [de-CH]
+     *
+     * @param $languages
+     * @param $subShops
+     * @return bool
+     */
+    private function getSubShopIdByFullBrowserLanguage($languages, $subShops) {
+        foreach ($languages as $language) {
+            foreach ($subShops as $subshop) {
+                $browserLanguage = strtolower($language);
+                $shopLocale = strtolower($subshop['locale']);
+
+                if ($browserLanguage === $shopLocale) {
                     return ($subshop['id']);
                 }
             }
         }
+        return false;
+    }
 
-        $default = $this->Config()->get('default');
+    /**
+     * HelperMethod for getSubshopId... try to get the LanguageShop by the BrowserLanguage "prefix" like [de] or [en]
+     *
+     * @param $languages
+     * @param $subShops
+     * @return bool
+     */
+    private function getSubShopIdByBrowserLanguagePrefix($languages, $subShops) {
+        foreach ($languages as $language) {
+            foreach ($subShops as $subshop) {
+                $browserLanguage = strtolower($language);
+                $currentLanguageArray = explode('-', $browserLanguage);
+                $browserLanguagePrefix = $currentLanguageArray[0];
+                $subshopLanguage = $subshop['language'];
 
-        if (!is_int($default)) {
-            $default = $subshops[0]['id'];
+                if ($browserLanguagePrefix === $subshopLanguage ) {
+                    return ($subshop['id']);
+                }
+            }
         }
-
-        return ($default);
+        return false;
     }
 
     /**
