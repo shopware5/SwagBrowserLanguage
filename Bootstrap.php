@@ -53,7 +53,9 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
 
     /**
      * Returns the current version of the plugin.
-     * @return string
+     *
+     * @return mixed
+     * @throws Exception
      */
     public function getVersion()
     {
