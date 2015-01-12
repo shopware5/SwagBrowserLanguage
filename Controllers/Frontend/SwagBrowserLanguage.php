@@ -34,10 +34,8 @@ class Shopware_Controllers_Frontend_SwagBrowserLanguage extends Enlight_Controll
     {
         $response = $this->Response();
         $shop = Shopware()->Shop();
-        $newShop = $shop->getDefault();
-        if(empty($newShop)){
-            $newShop = $shop;
-        }
+        $newShop = $shop->getMain() ?: $shop;
+
         $path = rtrim($newShop->getBasePath(), '/') . '/';
         $response->setCookie('shop', $newShop->getId(), 0, $path);
         $url = $this->Front()->Router()->assemble(array('controller' => 'index'));
