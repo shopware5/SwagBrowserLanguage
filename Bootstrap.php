@@ -183,6 +183,10 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
         $request = $args->getRequest();
         $response = $args->getResponse();
 
+        if($this->checkForBot($request)){
+            return;
+        }
+
         if (!$this->allowRedirect($args->getSubject())) {
             return;
         }
@@ -460,5 +464,33 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
         return true;
     }
 
+
+    /**
+     * This method checks if the UserAgent is a known Bot.
+     * If the UserAgent is a Bot, the method returns true .... else false
+     *
+     * @param Zend_Controller_Request_Http $request
+     * @return bool
+     */
+    private function checkForBot(Zend_Controller_Request_Http $request)
+    {
+        $userAgentName = $request->getServer('HTTP_USER_AGENT');
+        foreach($this->getBotArray() as $bot) {
+            if(strpos(strtolower($userAgentName), strtolower($bot)) !== false) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Get the known bot list from the Shopware config
+     *
+     * @return array
+     */
+    private function getBotArray()
+    {
+        return explode(';', Shopware()->Config()->get('botBlackList'));
+    }
 
 }
