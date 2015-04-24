@@ -1,0 +1,51 @@
+.modal--box {
+  width: 70%;
+  top: 40px;
+  margin: 0 15% 0 15%;
+  background: #FFFFFF;
+  box-shadow: 0 0 4px 1px #DADAE5;
+  position: fixed;
+  z-index: 3001;
+}
+
+.modal--heading h2 {
+  .unitize-margin(0, 0);
+  .unitize-padding(10, 40, 10, 15);
+}
+
+.modal--heading .action--remove {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.modal--box .modal--content {
+  .unitize-padding(10, 15);
+}
+
+.modal--box .modal--actions {
+  .unitize-padding(0, 15, 15, 15);
+}
+
+.modal--box .modal--actions .btn {
+  .unitize(10, 16, margin-bottom);
+  width: 100%;
+}
+
+@media screen and (min-width: @tabletViewportWidth) {
+  .modal--box {
+    width: 60%;
+    margin: 0 20% 0 20%;
+  }
+
+  .modal--box .modal--actions .btn {
+    width: auto;
+  }
+}
+
+@media screen and (min-width: @tabletLandscapeViewportWidth) {
+  .modal--box {
+    width: 50%;
+    margin: 0 25% 0 25%;
+  }
+}

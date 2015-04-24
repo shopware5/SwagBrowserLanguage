@@ -27,6 +27,9 @@
  * @subpackage SwagBrowserLanguage
  * @copyright  Copyright (c) 2012, shopware AG (http://www.shopware.de)
  */
+
+use Shopware\SwagBrowserLanguage\Subscriber;
+
 class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_Components_Plugin_Bootstrap
 {
     /**
@@ -94,7 +97,15 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
         $this->createConfiguration();
         $this->registerEvents();
 
-        return true;
+        return array('success' => true, 'invalidateCache' => array('theme', 'template'));
+    }
+
+    /**
+     * Method to always register the custom models and the namespace for the auto-loading
+     */
+    public function afterInit()
+    {
+        $this->Application()->Loader()->registerNamespace('Shopware\SwagBrowserLanguage', $this->Path());
     }
 
     /**
@@ -134,6 +145,107 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
                 'scope' => Shopware\Models\Config\Element::SCOPE_SHOP,
                 'description' => 'Wenn aktiviert, wird dem Kunden nach Weiterleitung eine kleine Infobox angezeigt mit der Option zum Hauptshop zurückzukehren.')
         );
+
+        $this->translateForm();
+    }
+
+    private function translateForm()
+    {
+        $translations = array(
+            'en_GB' => array(
+                'default' => array(
+                    'label' => 'Fallback shop',
+                    'description' => 'Forward to this shop if not found any shop languages matching browser language'
+                ),
+                'infobox' => array(
+                    'label' => 'Show note',
+                    'description' => 'When enabled, little info box is displayed after forwarding with the option to return to main store.'
+                )
+            )
+        );
+
+        // In 4.2.2 we introduced a helper function for this, so we can skip the custom logic
+        if ($this->assertMinimumVersion('4.2.2')) {
+            $this->addFormTranslations($translations);
+            return true;
+        }
+
+        // Translations
+        $form = $this->Form();
+        $shopRepository = Shopware()->Models()->getRepository('\Shopware\Models\Shop\Locale');
+
+        //iterate the languages
+        foreach ($translations as $locale => $snippets) {
+            $localeModel = $shopRepository->findOneBy(array(
+                'locale' => $locale
+            ));
+
+            //not found? continue with next language
+            if ($localeModel === null) {
+                continue;
+            }
+
+            if ($snippets['plugin_form']) {
+                // Translation for form description
+                foreach ($form->getTranslations() as $translation) {
+                    if ($translation->getLocale()->getLocale() == $locale) {
+                        $formTranslation = $translation;
+                    }
+                }
+                // If none found create a new one
+                if (!$formTranslation) {
+                    $formTranslation = new \Shopware\Models\Config\FormTranslation();
+                    $formTranslation->setLocale($localeModel);
+                    //add the translation to the form
+                    $form->addTranslation($formTranslation);
+                }
+
+                if ($snippets['plugin_form']['label']) {
+                    $formTranslation->setLabel($snippets['plugin_form']['label']);
+                }
+                if ($snippets['plugin_form']['description']) {
+                    $formTranslation->setDescription($snippets['plugin_form']['description']);
+                }
+
+                unset($snippets['plugin_form']);
+            }
+
+            //iterate all snippets of the current language
+            foreach ($snippets as $element => $snippets) {
+                $translationModel = null;
+
+                //get the form element by name
+                $elementModel = $form->getElement($element);
+
+                //not found? continue with next snippet
+                if ($elementModel === null) {
+                    continue;
+                }
+
+                // Try to load existing translation
+                foreach ($elementModel->getTranslations() as $translation) {
+                    if ($translation->getLocale()->getLocale() == $locale) {
+                        $translationModel = $translation;
+                        break;
+                    }
+                }
+
+                // If none found create a new one
+                if (!$translationModel) {
+                    $translationModel = new \Shopware\Models\Config\ElementTranslation();
+                    $translationModel->setLocale($localeModel);
+                    //add the translation to the form element
+                    $elementModel->addTranslation($translationModel);
+                }
+
+                if ($snippets['label']) {
+                    $translationModel->setLabel($snippets['label']);
+                }
+                if ($snippets['description']) {
+                    $translationModel->setDescription($snippets['description']);
+                }
+            }
+        }
     }
 
     /**
@@ -156,10 +268,33 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
             'onPostDispatchFrontend'
         );
 
+        $this->subscribeEvent(
+            'Enlight_Controller_Front_StartDispatch',
+            'onStartDispatch'
+        );
+
         return true;
     }
 
 
+    /**
+     * Main entry point for the bonus system: Registers various subscribers to hook into shopware
+     *
+     * @param Enlight_Event_EventArgs $args
+     */
+    public function onStartDispatch(Enlight_Event_EventArgs $args)
+    {
+        if ($this->assertMinimumVersion('5.0.0')) {
+            $subscribers = array(
+                new Subscriber\Less($this),
+                new Subscriber\Javascript($this),
+            );
+
+            foreach ($subscribers as $subscriber) {
+                $this->get('events')->addSubscriber($subscriber);
+            }
+        }
+    }
     /**
      * Uninstall function of the plugin.
      * Fired from the plugin manager.
@@ -398,12 +533,15 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
         }
 
         //Add our plugin template directory to load our slogan extension.
-        $view->addTemplateDir($this->Path() . 'Views/');
+        $version = Shopware()->Shop()->getTemplate()->getVersion();
+        if ($version >= 3) {
+            $view->addTemplateDir($this->Path() . '/Views/responsive');
+        } else {
+            $view->addTemplateDir($this->Path() . '/Views/emotion', 'swag_browser_language');
+            $view->extendsTemplate('frontend/plugins/swag_browser_language/index.tpl');
+        }
 
-        $view->extendsTemplate('frontend/plugins/swag_browser_language/index.tpl');
-
-        $show_modal = (int)$request->getParam('show_modal');
-
+        $show_modal = (int) $request->getParam('show_modal');
         if ($show_modal) {
             $view->assign('show_modal', $request->getBasePath() . $request->getPathInfo());
         }
