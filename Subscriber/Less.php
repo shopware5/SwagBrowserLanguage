@@ -7,13 +7,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 
 class Less implements SubscriberInterface
 {
-	protected $bootstrap;
-
-	public function __construct(\Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap $bootstrap)
-	{
-		$this->bootstrap = $bootstrap;
-	}
-
 	public static function getSubscribedEvents()
 	{
 		return array(
@@ -24,10 +17,9 @@ class Less implements SubscriberInterface
 	/**
 	 * Provide the needed less files
 	 *
-	 * @param \Enlight_Event_EventArgs $args
 	 * @return Doctrine\Common\Collections\ArrayCollection
 	 */
-	public function addLessFiles(\Enlight_Event_EventArgs $args)
+	public function addLessFiles()
 	{
 		$less = new \Shopware\Components\Theme\LessDefinition(
 		//configuration

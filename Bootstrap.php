@@ -286,8 +286,8 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
     {
         if ($this->assertMinimumVersion('5.0.0')) {
             $subscribers = array(
-                new Subscriber\Less($this),
-                new Subscriber\Javascript($this),
+                new Subscriber\Less(),
+                new Subscriber\Javascript()
             );
 
             foreach ($subscribers as $subscriber) {

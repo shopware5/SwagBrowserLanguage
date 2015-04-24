@@ -6,19 +6,19 @@
             <div>
                 <div class="heading">
                     <h2>
-                        {s name=modal/main_title}Automatische Weiterleitung{/s}
+                        {s name=modal/main_title}Automatic forwarding{/s}
                     </h2>
-                    <a class="modal_close" title="{s name=modal/close}Fenster schließen{/s}">{s name=modal/close}Fenster schließen{/s}</a>
+                    <a class="modal_close" title="{s name=modal/close}Close window{/s}">{s name=modal/close}Close window{/s}</a>
                 </div>
                 <div style="padding: 10px 25px">
-                    <p>{s name=modal/text}Wir haben Sie automatisch auf den Shop Ihrer Sprache weitergeleitet.<br>War das nicht gewünscht, können sie hier auch zum Hauptshop zurückkehren.{/s}</p>
+                    <p>{s name=modal/text}We automatically redirected you to the shop in your language.<br>If you don't want that, you can move back to the main shop.{/s}</p>
                 </div>
                 <div class="actions" style="padding:0 15px 15px 15px;">
-                    <a class="button-middle large modal_close" title="{s name=modal/close}Zurück zum Hauptshop{/s}" href="{url controller='SwagBrowserLanguage' action='index'}">
-                        {s name=modal/back}Zurück zum Hauptshop{/s}
+                    <a class="button-middle large modal_close" title="{s name=modal/back}Back to main shop{/s}" href="{url controller='SwagBrowserLanguage' action='index'}">
+                        {s name=modal/back}Back to main shop{/s}
                     </a>
-                    <a class="button-right large right modal_close" rel="nofollow" title="{s name=modal/close}Fenster schließen{/s}">
-                        {s name=modal/close}Fenster schließen{/s}
+                    <a class="button-right large right modal_close" rel="nofollow" title="{s name=modal/close}Close window{/s}">
+                        {s name=modal/close}Close window{/s}
                     </a>
                 </div>
             </div>
