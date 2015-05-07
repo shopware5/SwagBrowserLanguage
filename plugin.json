@@ -8,16 +8,18 @@
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
 
-    "currentVersion": "1.0.5",
+    "currentVersion": "1.0.6",
 
     "changelog": {
         "de": {
+            "1.0.6": "PT-3009 - SW5 Kompatiblität", 
             "1.0.5": "PT-2672 - Bugfix: Problem mit Google Crawling behoben",
             "1.0.4": "Korrektur: Sucht den Sprachshop nun nach der vollen Browsersprache wie [en-US] oder [en-GB]; PT-2108 - Korrektur: Der default Shop wird nun auf Null geprüft.",
             "1.0.3": "Korrektur: Begrenzung der weitergeleiteten Requests",
             "1.0.2": "Korrigiert Installations-Probleme"
         },
         "en": {
+            "1.0.6": "PT-3009 - SW5 compatibility", 
             "1.0.5": "PT-2672 - Bugfix: Problem with Google crawling",
             "1.0.4": "Fix: Seek the language Shop now for full browser language as [en-US] or [en-GB]; PT-2108 - Fix. The default shop is checked for null",
             "1.0.3": "Fix: Limit kind of request which are redirected",
