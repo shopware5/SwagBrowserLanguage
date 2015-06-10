@@ -268,16 +268,17 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
      */
     public function onStartDispatch(Enlight_Event_EventArgs $args)
     {
-        if ($this->assertMinimumVersion('5.0.0')) {
-            $subscribers = array(
-                new Subscriber\Less(),
-                new Subscriber\Javascript(),
-                new Subscriber\Frontend($this)
-            );
+        $subscribers = array(
+            new Subscriber\Frontend($this)
+        );
 
-            foreach ($subscribers as $subscriber) {
-                $this->get('events')->addSubscriber($subscriber);
-            }
+        if ($this->assertMinimumVersion('5.0.0')) {
+            $subscribers[] = new Subscriber\Less();
+            $subscribers[] = new Subscriber\Javascript();
+        }
+
+        foreach ($subscribers as $subscriber) {
+            $this->get('events')->addSubscriber($subscriber);
         }
     }
     /**
