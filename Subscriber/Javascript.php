@@ -17,7 +17,7 @@ class Javascript implements SubscriberInterface
 	/**
 	 * Provide the needed javascript files
 	 *
-	 * @return Doctrine\Common\Collections\ArrayCollection
+	 * @return \Doctrine\Common\Collections\ArrayCollection
 	 */
 	public function addJsFiles()
 	{
