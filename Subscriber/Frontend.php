@@ -105,7 +105,7 @@ class Frontend implements SubscriberInterface
         $languages = $this->getBrowserLanguages($request);
         $subShopId = $this->shopFinder->getSubshopId($languages);
 
-        if ($subShopId == $this->shopFinder->getfirtstSubshopId()) {
+        if ($subShopId == $this->shopFinder->getFirstSubshopId()) {
             return;
         }
 

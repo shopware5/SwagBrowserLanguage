@@ -63,7 +63,7 @@ class ShopFinder
     /**
      * @return mixed
      */
-    public function getFirstSubShopId()
+    public function getFirstSubshopId()
     {
         return $this->subShops[0]['id'];
     }
@@ -87,7 +87,7 @@ class ShopFinder
     private function getDefaultShopId() {
         $default = $this->pluginBootstrap->Config()->get('default');
         if (!is_int($default)) {
-            $default = $this->getfirtstSubshopId();
+            $default = $this->getFirstSubshopId();
         }
         return ($default);
     }
