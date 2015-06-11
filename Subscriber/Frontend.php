@@ -101,16 +101,13 @@ class Frontend implements SubscriberInterface
         if(Shopware()->Session()->Bot) {
             return;
         }
-// TODO: Remove after debug
-$logger = Shopware()->DgLogger();
-$logger->writeMessageToLog('find SHop');
-// TODO: end remove
+
         $languages = $this->getBrowserLanguages($request);
         $subShopId = $this->shopFinder->getSubshopId($languages);
 
-//        if ($subShopId == $this->shopFinder->getfirtstSubshopId()) {
-//            return;
-//        }
+        if ($subShopId == $this->shopFinder->getfirtstSubshopId()) {
+            return;
+        }
 
         $params = '';
 
@@ -191,11 +188,6 @@ $logger->writeMessageToLog('find SHop');
             $newShop->getBaseUrl(),
             $params
         );
-        
-        // TODO: Remove after debug
-        $logger = Shopware()->DgLogger();
-        $logger->writeMessageToLog($url);
-        // TODO: end remove
 
         $response->setRedirect($url);
     }

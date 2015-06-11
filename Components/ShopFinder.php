@@ -49,10 +49,6 @@ class ShopFinder
         if (!$subShopId) {
             $subShopId = $this->getDefaultShopId();
         }
-        // TODO: Remove after debug
-        $logger = Shopware()->DgLogger();
-        $logger->writeMessageToLog($subShopId);
-        // TODO: end remove
         return $subShopId;
     }
 
