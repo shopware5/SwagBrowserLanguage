@@ -63,7 +63,7 @@ class ShopFinder
     /**
      * @return mixed
      */
-    public function getfirtstSubshopId()
+    public function getFirstSubShopId()
     {
         return $this->subShops[0]['id'];
     }
