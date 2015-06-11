@@ -55,7 +55,7 @@ class Frontend implements SubscriberInterface
         return array(
             'Enlight_Controller_Dispatcher_ControllerPath_Frontend_SwagBrowserLanguage' => 'onGetFrontendController',
             'Enlight_Controller_Action_PreDispatch' => 'onPreDispatch',
-            'Enlight_Controller_Action_PostDispatch' => 'onPostDispatchFrontend'
+            'Enlight_Controller_Action_PostDispatchSecure_Frontend' => 'onPostDispatchFrontend'
         );
     }
 
@@ -98,17 +98,19 @@ class Frontend implements SubscriberInterface
             return;
         }
 
-        $botDetector = new BotDetector();
-        if($botDetector->checkForBot($request)){
+        if(Shopware()->Session()->Bot) {
             return;
         }
-
+// TODO: Remove after debug
+$logger = Shopware()->DgLogger();
+$logger->writeMessageToLog('find SHop');
+// TODO: end remove
         $languages = $this->getBrowserLanguages($request);
         $subShopId = $this->shopFinder->getSubshopId($languages);
 
-        if ($subShopId == $this->shopFinder->getfirtstSubshop()) {
-            return;
-        }
+//        if ($subShopId == $this->shopFinder->getfirtstSubshopId()) {
+//            return;
+//        }
 
         $params = '';
 
@@ -139,12 +141,6 @@ class Frontend implements SubscriberInterface
         /** @var $view Enlight_View_Default */
         $view = $controller->View();
 
-        //Check if there is a template and if an exception has occured
-        if (!$request->isDispatched() || $response->isException() || !$view->hasTemplate() || $request->getModuleName() != "frontend") {
-            return;
-        }
-
-        //Add our plugin template directory to load our slogan extension.
         $version = Shopware()->Shop()->getTemplate()->getVersion();
         if ($version >= 3) {
             $view->addTemplateDir($this->pluginBootstrap->Path() . '/Views/responsive');
@@ -195,6 +191,11 @@ class Frontend implements SubscriberInterface
             $newShop->getBaseUrl(),
             $params
         );
+        
+        // TODO: Remove after debug
+        $logger = Shopware()->DgLogger();
+        $logger->writeMessageToLog($url);
+        // TODO: end remove
 
         $response->setRedirect($url);
     }

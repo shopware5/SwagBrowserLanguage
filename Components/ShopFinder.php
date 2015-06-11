@@ -49,6 +49,10 @@ class ShopFinder
         if (!$subShopId) {
             $subShopId = $this->getDefaultShopId();
         }
+        // TODO: Remove after debug
+        $logger = Shopware()->DgLogger();
+        $logger->writeMessageToLog($subShopId);
+        // TODO: end remove
         return $subShopId;
     }
 
@@ -63,7 +67,7 @@ class ShopFinder
     /**
      * @return mixed
      */
-    public function getfirtstSubshop()
+    public function getfirtstSubshopId()
     {
         return $this->subShops[0]['id'];
     }
@@ -87,7 +91,7 @@ class ShopFinder
     private function getDefaultShopId() {
         $default = $this->pluginBootstrap->Config()->get('default');
         if (!is_int($default)) {
-            $default = $this->getfirtstSubshop();
+            $default = $this->getfirtstSubshopId();
         }
         return ($default);
     }
