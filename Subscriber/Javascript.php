@@ -22,7 +22,7 @@ class Javascript implements SubscriberInterface
 	public function addJsFiles()
 	{
 		$jsPath = array(
-            dirname(__DIR__) . '/Views/responsive/frontend/_public/src/js/jquery.modal.js'
+            dirname(__DIR__) . '/Views/responsive/frontend/_public/src/js/jquery.redirect.js'
 		);
 
 		return new ArrayCollection($jsPath);

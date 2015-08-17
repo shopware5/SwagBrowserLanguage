@@ -42,13 +42,25 @@ class ShopFinder
      */
     public function getSubshopId($languages)
     {
-        $subShopId = $this->getSubShopIdByFullBrowserLanguage($languages);
+        $assignedShops = Shopware()->Config()->get('assignedShops');
+        $assignedShops = array_values($assignedShops);
+
+        if(!$assignedShops) {
+            return $this->getDefaultShopId();
+        }
+
+        $subShopId = $this->getSubShopIdByFullBrowserLanguage($languages, $assignedShops);
         if (!$subShopId) {
-            $subShopId = $this->getSubShopIdByBrowserLanguagePrefix($languages);
+            $subShopId = $this->getSubShopIdByBrowserLanguagePrefix($languages, $assignedShops);
         }
         if (!$subShopId) {
             $subShopId = $this->getDefaultShopId();
         }
+
+        if(!in_array($subShopId, $assignedShops)) {
+            return $this->getDefaultShopId();
+        }
+
         return $subShopId;
     }
 
@@ -80,6 +92,21 @@ class ShopFinder
     }
 
     /**
+     * Helper method that creates an array of shop information that may be used in the modal box.
+     * @param $subShopIds
+     * @return array
+     */
+    public function getShopsForModal($subShopIds)
+    {
+        $resultArray = array();
+        foreach($subShopIds as $subShopId) {
+            $model = $this->getShopRepository($subShopId);
+            $resultArray[$subShopId] = $model->getName();
+        }
+
+        return $resultArray;
+    }
+    /**
      * HelperMethod for getSubShopId... get the default ShopId
      *
      * @return int
@@ -96,15 +123,16 @@ class ShopFinder
      * HelperMethod for getSubShopId... try to get the LanguageShop by the full BrowserLanguage like [de-DE] or [de-CH]
      *
      * @param $languages
+     * @param $assignedShops
      * @return bool
      */
-    private function getSubShopIdByFullBrowserLanguage($languages) {
+    private function getSubShopIdByFullBrowserLanguage($languages, $assignedShops) {
         foreach ($languages as $language) {
             foreach ($this->subShops as $subshop) {
                 $browserLanguage = strtolower($language);
                 $shopLocale = strtolower($subshop['locale']);
 
-                if ($browserLanguage === $shopLocale) {
+                if ($browserLanguage === $shopLocale && in_array($subshop['id'], $assignedShops)) {
                     return ($subshop['id']);
                 }
             }
@@ -116,9 +144,10 @@ class ShopFinder
      * HelperMethod for getSubShopId... try to get the LanguageShop by the BrowserLanguage "prefix" like [de] or [en]
      *
      * @param $languages
+     * @param $assignedShops
      * @return bool
      */
-    private function getSubShopIdByBrowserLanguagePrefix($languages) {
+    private function getSubShopIdByBrowserLanguagePrefix($languages, $assignedShops) {
         foreach ($languages as $language) {
             foreach ($this->subShops as $subshop) {
                 $browserLanguage = strtolower($language);
@@ -126,7 +155,7 @@ class ShopFinder
                 $browserLanguagePrefix = $currentLanguageArray[0];
                 $subshopLanguage = $subshop['language'];
 
-                if ($browserLanguagePrefix === $subshopLanguage ) {
+                if ($browserLanguagePrefix === $subshopLanguage && in_array($subshop['id'], $assignedShops)) {
                     return ($subshop['id']);
                 }
             }
@@ -161,26 +190,18 @@ class ShopFinder
         return $subshops;
     }
 
+    /**
+     * Helper function that queries all sub shops (including language sub shops).
+     * @return array
+     */
     private function getData()
     {
-        $mainShopId = $this->getMainShop();
         /** @var \Shopware\Models\Shop\Repository $repository */
         $repository = Shopware()->Models()->getRepository('Shopware\Models\Shop\Shop');
         $builder = $repository->getActiveQueryBuilder();
         $builder->orderBy('shop.id');
-        if ($mainShopId > 0) {
-            $builder->andWhere('shop.id = :mainShopId')
-                ->orWhere('shop.mainId = :mainShopId')
-                ->andWhere('shop.active = 1')
-                ->setParameter('mainShopId', $mainShopId);
-        }
+        $builder->andWhere('shop.active = 1');
 
         return $builder->getQuery()->getArrayResult();
-    }
-
-    private function getMainShop()
-    {
-        $sql = "SELECT id FROM s_core_shops WHERE main_id = NULL";
-        return Shopware()->Container()->get('db')->fetchOne($sql);
     }
 }
