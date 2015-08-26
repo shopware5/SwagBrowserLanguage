@@ -73,7 +73,7 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
     }
 
     /**
-     * Returns an array with some informations about the plugin.
+     * Returns an array with some information about the plugin.
      * @return array
      */
     public function getInfo()
@@ -97,7 +97,6 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
     {
         $this->createConfiguration();
         $this->registerEvents();
-
         return array('success' => true, 'invalidateCache' => array('theme', 'template'));
     }
 
@@ -130,20 +129,26 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
             'default',
             array(
                 'label' => 'Fallback-Sprachshop',
-                'store' => $store,
+                'store' => 'base.ShopLanguage',
                 'scope' => Shopware\Models\Config\Element::SCOPE_SHOP,
                 'required' => true,
-                'value' => $subShops[0]['id'],
+                'value' => null,
                 'description' => 'Auf diesen Shop wird weitergeleitet, wenn kein zu den Browsersprachen passender Shop existiert.'
             )
         );
+
         $form->setElement(
-            'checkbox',
-            'infobox',
-            array(
-                'label' => 'Hinweis anzeigen',
-                'scope' => Shopware\Models\Config\Element::SCOPE_SHOP,
-                'description' => 'Wenn aktiviert, wird dem Kunden nach Weiterleitung eine kleine Infobox angezeigt mit der Option zum Hauptshop zurückzukehren.')
+                'select',
+                'assignedShops',
+                array(
+                        'label' => 'Zugehörige Shops',
+                        'store' => 'base.ShopLanguage',
+                        'scope' => Shopware\Models\Config\Element::SCOPE_SHOP,
+                        'required' => false,
+                        'value' => null,
+                        'description' => 'Auf diese Shops wird weitergeleitet, wenn die Browsersprache der Shopsprache entspricht.',
+                        'multiSelect' => true
+                )
         );
 
         $this->translateForm();
@@ -157,10 +162,10 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
                     'label' => 'Fallback shop',
                     'description' => 'Forward to this shop if not found any shop languages matching browser language'
                 ),
-                'infobox' => array(
-                    'label' => 'Show note',
-                    'description' => 'When enabled, little info box is displayed after forwarding with the option to return to main store.'
-                )
+                'assignedShops' => array(
+                    'label' => 'Related shops',
+                    'description' => 'Forwards to these shops, if the browser language equals the shop language.',
+                ),
             )
         );
 
@@ -273,7 +278,6 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
         );
 
         if ($this->assertMinimumVersion('5.0.0')) {
-            $subscribers[] = new Subscriber\Less();
             $subscribers[] = new Subscriber\Javascript();
         }
 
