@@ -96,9 +96,11 @@ class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controlle
 
         $subShopId = $this->getShopFinder()->getSubshopId($languages);
 
-        echo json_encode([
-            'destinationId' => $subShopId,
-        ]);
+        echo json_encode(
+            array(
+                'destinationId' => $subShopId,
+            )
+        );
     }
 
     /**
