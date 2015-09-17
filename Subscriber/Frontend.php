@@ -19,11 +19,6 @@ class Frontend implements SubscriberInterface
     private $pluginBootstrap;
 
     /**
-     * @var ShopFinder $shopFinder
-     */
-    private $shopFinder;
-
-    /**
      * @var array $controllerWhiteList
      */
     private $controllerWhiteList = array('detail', 'index', 'listing');
@@ -36,7 +31,6 @@ class Frontend implements SubscriberInterface
     public function __construct(Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap $pluginBootstrap)
     {
         $this->pluginBootstrap = $pluginBootstrap;
-        $this->shopFinder = new ShopFinder($this->pluginBootstrap);
     }
 
     /**
@@ -83,13 +77,13 @@ class Frontend implements SubscriberInterface
         /** @var $request Zend_Controller_Request_Http */
         $request = $controller->Request();
 
-        if(!in_array($request->getControllerName(), $this->controllerWhiteList)) {
+        if (!in_array($request->getControllerName(), $this->controllerWhiteList)) {
             return;
         }
 
         $assignedShops = Shopware()->Config()->get("assignedShops");
 
-        if(empty($assignedShops)) {
+        if (empty($assignedShops)) {
             return;
         }
 

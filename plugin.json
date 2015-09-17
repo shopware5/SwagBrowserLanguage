@@ -8,10 +8,11 @@
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
 
-    "currentVersion": "1.0.8",
+    "currentVersion": "1.0.9",
 
     "changelog": {
         "de": {
+            "1.0.9": "PT-3891 - Bugfix: Probleme nach Shopware-Update behoben",
             "1.0.8": "PT-3617 - Bugfix: Subshop Kompatibilität;",
             "1.0.7": "PT-3194 - Bugfix: Auswahl des richtigen Sprachshops;",
             "1.0.6": "PT-3009 - SW5 Kompatiblität",
@@ -21,6 +22,7 @@
             "1.0.2": "Korrigiert Installations-Probleme"
         },
         "en": {
+            "1.0.9": "PT-3891 - Bugfix: Fixed issues after updating Shopware",
             "1.0.8": "PT-3617 - Bugfix: Subshop compatibility;",
             "1.0.7": "PT-3194 - Bugfix: Selection of the correct language shop;",
             "1.0.6": "PT-3009 - SW5 compatibility",
