@@ -26,8 +26,8 @@
  * @copyright  Copyright (c) 2013, shopware AG (http://www.shopware.de)
  */
 
-use Shopware\Models\Shop\Shop;
 use Shopware\SwagBrowserLanguage\Components\ShopFinder;
+use Shopware\SwagBrowserLanguage\Components\Translator;
 use Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap as Bootstrap;
 
 class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controller_Action
@@ -48,23 +48,32 @@ class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controlle
     private $pluginBootstrap = null;
 
     /**
-     * @return ShopFinder
+     * @var Enlight_Components_Session_Namespace
      */
-    private function getShopFinder()
-    {
-        if ($this->shopFinder === null) {
-            $this->shopFinder = new ShopFinder($this->getPluginBootstrap());
-        }
+    private $session = null;
 
-        return $this->shopFinder;
-    }
+    /**
+     * @var Translator $translator
+     */
+    private $translator = null;
 
-    private function getPluginBootstrap()
+    /**
+     * @var \Shopware\Models\Shop\Shop null
+     */
+    private $shop = null;
+
+    /**
+     * This function will be called before the widget is being finalized
+     */
+    public function preDispatch()
     {
-        if ($this->pluginBootstrap === null) {
-            $this->pluginBootstrap = $this->get('plugins')->Frontend()->SwagBrowserLanguage();
-        }
-        return $this->pluginBootstrap;
+        $this->pluginBootstrap = $this->get('plugins')->Frontend()->SwagBrowserLanguage();
+        $this->shopFinder = new ShopFinder($this->pluginBootstrap, $this->getModelManager());
+        $this->translator = new Translator($this->pluginBootstrap, $this->getModelManager(), $this->get("snippets"), $this->get("db"));
+        $this->session = $this->get("session");
+        $this->shop = $this->get("shop");
+
+        parent::preDispatch();
     }
 
     /**
@@ -76,17 +85,17 @@ class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controlle
         $this->get('Front')->Plugins()->ViewRenderer()->setNoRender();
         $request = $this->Request();
 
-        if(Shopware()->Session()->Bot) {
+        if ($this->session->Bot) {
             return;
         }
 
         $languages = $this->getBrowserLanguages($request);
 
-        $currentLocale = Shopware()->Shop()->getLocale()->getLocale();
+        $currentLocale = $this->shop->getLocale()->getLocale();
         $currentLanguage = explode('_', $currentLocale);
 
         //Does this shop have the browser language already?
-        if(in_array($currentLocale, $languages) || in_array($currentLanguage[0], $languages)) {
+        if (in_array($currentLocale, $languages) || in_array($currentLanguage[0], $languages)) {
             return;
         }
 
@@ -94,13 +103,16 @@ class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controlle
             return;
         }
 
-        $subShopId = $this->getShopFinder()->getSubshopId($languages);
+        $subShopId = $this->shopFinder->getSubshopId($languages);
 
-        echo json_encode(
-            array(
-                'destinationId' => $subShopId,
-            )
-        );
+        //If the current shop is the destination shop do not redirect
+        if ($this->shop->getId() == $subShopId) {
+            return;
+        }
+
+        echo json_encode(array(
+            'destinationId' => $subShopId,
+        ));
     }
 
     /**
@@ -114,15 +126,17 @@ class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controlle
         $languages = $request->getServer('HTTP_ACCEPT_LANGUAGE');
         $languages = str_replace('-', '_', $languages);
 
-        if(strpos($languages, ',') == true) {
+        if (strpos($languages, ',') == true) {
             $languages = explode(',', $languages);
+        } else {
+            $languages = (array)$languages;
         }
 
         foreach ($languages as $key => $language) {
             $language = explode(';', $language);
             $languages[$key] = $language[0];
         }
-        return $languages;
+        return (array)$languages;
     }
 
     /**
@@ -161,12 +175,17 @@ class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controlle
     {
         $request = $this->Request();
         $languages = $this->getBrowserLanguages($request);
-        $subShopId = $this->getShopFinder()->getSubshopId($languages);
+        $subShopId = $this->shopFinder->getSubshopId($languages);
+
+        $assignedShops = $this->pluginBootstrap->Config()->get("assignedShops");
+        $shopsToDisplay = $this->shopFinder->getShopsForModal($assignedShops);
+
+        $snippets = $this->translator->getSnippets($languages);
 
         $this->View()->loadTemplate('responsive/frontend/plugins/swag_browser_language/modal.tpl');
-
-        $this->View()->assign("shops", $this->getShopFinder()->getShopsForModal(Shopware()->Config()->get("assignedShops")));
-        $this->View()->assign("destinationShop", $this->getShopFinder()->getShopRepository($subShopId)->getName());
+        $this->View()->assign("snippets", $snippets);
+        $this->View()->assign("shops", $shopsToDisplay);
+        $this->View()->assign("destinationShop", $this->shopFinder->getShopRepository($subShopId)->getName());
         $this->View()->assign("destinationId", $subShopId);
     }
 }

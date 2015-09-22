@@ -6,7 +6,6 @@ use Enlight\Event\SubscriberInterface;
 use Enlight_Event_EventArgs;
 use Enlight_View_Default;
 use Shopware\SwagBrowserLanguage\Components\BotDetector;
-use Shopware\SwagBrowserLanguage\Components\ShopFinder;
 use Shopware_Controllers_Frontend_Index;
 use Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap;
 use Zend_Controller_Request_Http;
@@ -53,13 +52,9 @@ class Frontend implements SubscriberInterface
      */
     public function onGetFrontendController()
     {
-        $this->pluginBootstrap->Application()->Snippets()->addConfigDir(
-            $this->pluginBootstrap->Path() . 'Snippets/'
-        );
+        $this->pluginBootstrap->Application()->Snippets()->addConfigDir($this->pluginBootstrap->Path() . 'Snippets/');
 
-        $this->pluginBootstrap->Application()->Template()->addTemplateDir(
-            $this->pluginBootstrap->Path() . 'Views/'
-        );
+        $this->pluginBootstrap->Application()->Template()->addTemplateDir($this->pluginBootstrap->Path() . 'Views/');
 
         return $this->pluginBootstrap->Path() . 'Controllers/Widgets/SwagBrowserLanguage.php';
     }
@@ -81,7 +76,7 @@ class Frontend implements SubscriberInterface
             return;
         }
 
-        $assignedShops = Shopware()->Config()->get("assignedShops");
+        $assignedShops = $this->pluginBootstrap->Config()->get("assignedShops");
 
         if (empty($assignedShops)) {
             return;
