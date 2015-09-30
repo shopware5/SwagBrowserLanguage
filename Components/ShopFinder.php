@@ -27,8 +27,10 @@ class ShopFinder
      * @param Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap $pluginBootstrap
      * @param bool $isBackend
      */
-    public function __construct(Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap $pluginBootstrap, $isBackend = false)
-    {
+    public function __construct(
+            Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap $pluginBootstrap,
+            $isBackend = false
+    ) {
         $this->pluginBootstrap = $pluginBootstrap;
         $this->isBackend = $isBackend;
         $this->subShops = $this->getLanguageShops();
@@ -45,7 +47,7 @@ class ShopFinder
         $assignedShops = Shopware()->Config()->get('assignedShops');
         $assignedShops = array_values($assignedShops);
 
-        if(!$assignedShops) {
+        if (!$assignedShops) {
             return $this->getDefaultShopId();
         }
 
@@ -57,10 +59,9 @@ class ShopFinder
             $subShopId = $this->getDefaultShopId();
         }
 
-        if(!in_array($subShopId, $assignedShops)) {
+        if (!in_array($subShopId, $assignedShops)) {
             return $this->getDefaultShopId();
         }
-
         return $subShopId;
     }
 
@@ -99,19 +100,21 @@ class ShopFinder
     public function getShopsForModal($subShopIds)
     {
         $resultArray = array();
-        foreach($subShopIds as $subShopId) {
+        foreach ($subShopIds as $subShopId) {
             $model = $this->getShopRepository($subShopId);
             $resultArray[$subShopId] = $model->getName();
         }
 
         return $resultArray;
     }
+
     /**
      * HelperMethod for getSubShopId... get the default ShopId
      *
      * @return int
      */
-    private function getDefaultShopId() {
+    private function getDefaultShopId()
+    {
         $default = $this->pluginBootstrap->Config()->get('default');
         if (!is_int($default)) {
             $default = $this->getFirstSubshopId();
@@ -126,15 +129,13 @@ class ShopFinder
      * @param $assignedShops
      * @return bool
      */
-    private function getSubShopIdByFullBrowserLanguage($languages, $assignedShops) {
-        foreach ($languages as $language) {
-            foreach ($this->subShops as $subshop) {
-                $browserLanguage = strtolower($language);
-                $shopLocale = strtolower($subshop['locale']);
-
-                if ($browserLanguage === $shopLocale && in_array($subshop['id'], $assignedShops)) {
-                    return ($subshop['id']);
-                }
+    private function getSubShopIdByFullBrowserLanguage($languages, $assignedShops)
+    {
+        if (!is_array($languages)) {
+           return $this->parseSubShopIdByLanguage($languages, $assignedShops);
+        } else {
+            foreach ($languages as $language) {
+                return $this->parseSubShopIdByLanguage($language, $assignedShops);
             }
         }
         return false;
@@ -147,19 +148,60 @@ class ShopFinder
      * @param $assignedShops
      * @return bool
      */
-    private function getSubShopIdByBrowserLanguagePrefix($languages, $assignedShops) {
-        foreach ($languages as $language) {
-            foreach ($this->subShops as $subshop) {
-                $browserLanguage = strtolower($language);
-                $currentLanguageArray = explode('-', $browserLanguage);
-                $browserLanguagePrefix = $currentLanguageArray[0];
-                $subshopLanguage = $subshop['language'];
-
-                if ($browserLanguagePrefix === $subshopLanguage && in_array($subshop['id'], $assignedShops)) {
-                    return ($subshop['id']);
-                }
+    private function getSubShopIdByBrowserLanguagePrefix($languages, $assignedShops)
+    {
+        if (!is_array($languages)) {
+            return $this->parseSubShopIdByLanguagePrefix($languages, $assignedShops);
+        } else {
+            foreach ($languages as $language) {
+                return $this->parseSubShopIdByLanguagePrefix($language, $assignedShops);
             }
         }
+
+        return false;
+    }
+
+    /**
+     * A helper method that parses the best matching subshop id from a specific language
+     *
+     * @param $languages
+     * @param $assignedShops
+     * @return mixed
+     */
+    private function parseSubShopIdByLanguage($languages, $assignedShops)
+    {
+        foreach ($this->subShops as $subshop) {
+            $browserLanguage = strtolower($languages);
+            $shopLocale = strtolower($subshop['locale']);
+
+            if ($browserLanguage === $shopLocale && in_array($subshop['id'], $assignedShops)) {
+                return ($subshop['id']);
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * A helper method that parses the best matching subshop id from a specific language by the language prefix
+     *
+     * @param $language
+     * @param $assignedShops
+     * @return mixed
+     */
+    private function parseSubShopIdByLanguagePrefix($language, $assignedShops)
+    {
+        foreach ($this->subShops as $subshop) {
+            $browserLanguage = strtolower($language);
+            $currentLanguageArray = explode('_', $browserLanguage);
+            $browserLanguagePrefix = $currentLanguageArray[0];
+            $subshopLanguage = $subshop['language'];
+
+            if ($browserLanguagePrefix === $subshopLanguage && in_array($subshop['id'], $assignedShops)) {
+                return ($subshop['id']);
+            }
+        }
+
         return false;
     }
 

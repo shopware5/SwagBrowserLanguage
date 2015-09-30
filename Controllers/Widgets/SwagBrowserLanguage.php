@@ -112,7 +112,11 @@ class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controlle
     private function getBrowserLanguages(Enlight_Controller_Request_Request $request)
     {
         $languages = $request->getServer('HTTP_ACCEPT_LANGUAGE');
-        $languages = explode(',', $languages);
+        $languages = str_replace('-', '_', $languages);
+
+        if(strpos($languages, ',') == true) {
+            $languages = explode(',', $languages);
+        }
 
         foreach ($languages as $key => $language) {
             $language = explode(';', $language);
