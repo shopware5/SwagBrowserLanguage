@@ -75,7 +75,6 @@
                 url: me.$el.attr('data-redirectUrl'),
                 success: function (response) {
                     var data = JSON.parse(response);
-
                     if(data.destinationId) {
                         sessionStorage.setItem("swBrowserLanguage_destinationId", data.destinationId);
                     }
@@ -88,7 +87,6 @@
         },
 
         redirect: function(shopId) {
-
             $('<form>', {
                 'action': '',
                 'method': 'post',

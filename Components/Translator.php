@@ -56,7 +56,7 @@ class Translator
     {
         $result = array();
 
-        $localeId = $this->getLocaleId($locale);
+        $localeId = $this->getLocaleId($locale[0]);
 
         $snippetNamespace = $this->getSnippetNamespace($localeId);
 
