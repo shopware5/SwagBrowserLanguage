@@ -86,7 +86,7 @@ class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controlle
         $request = $this->Request();
 
         if ($this->session->Bot) {
-            print json_encode(array(
+            echo json_encode(array(
                 'success' => false
             ));
             return;
@@ -99,14 +99,14 @@ class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controlle
 
         //Does this shop have the browser language already?
         if (in_array($currentLocale, $languages) || in_array($currentLanguage[0], $languages)) {
-            print json_encode(array(
+            echo json_encode(array(
                 'success' => false
             ));
             return;
         }
 
         if (!$this->allowRedirect($this->Request()->getPost())) {
-            print json_encode(array(
+            echo json_encode(array(
                 'success' => false
             ));
             return;
@@ -122,7 +122,7 @@ class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controlle
             return;
         }
 
-        print json_encode(array(
+        echo json_encode(array(
             'success' => true,
             'destinationId' => $subShopId,
         ));
