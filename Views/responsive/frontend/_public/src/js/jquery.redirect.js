@@ -75,11 +75,13 @@
                 url: me.$el.attr('data-redirectUrl'),
                 success: function (response) {
                     var data = JSON.parse(response);
-                    if(data.destinationId) {
-                        sessionStorage.setItem("swBrowserLanguage_destinationId", data.destinationId);
-                    }
+                    if(data.success == true) {
+                        if(data.destinationId) {
+                            sessionStorage.setItem("swBrowserLanguage_destinationId", data.destinationId);
+                        }
 
-                    me.showModal();
+                        me.showModal();
+                    }
                 }
             });
 
