@@ -22,9 +22,15 @@
 
             me.applyDataAttributes(false);
 
+            $.subscribe('plugin/swModal/onOpenAjax', $.proxy(me.onOpenModal, me));
+
             if(!sessionStorage.getItem('swBrowserLanguage_redirected')) {
                 me.handleRedirect();
             }
+        },
+
+        onOpenModal: function() {
+            $('.modal--language-select').swSelectboxReplacement();
         },
 
         showModal: function() {
@@ -38,7 +44,7 @@
             $.modal.open(url, {
                 title: me.opts.modalTitle,
                 mode: 'ajax',
-                height: 275
+                sizing: 'content'
             });
 
             $($.modal._$modalBox).one('click.swag_browser_language', '.modal--close-button', function () {
@@ -69,12 +75,13 @@
                 url: me.$el.attr('data-redirectUrl'),
                 success: function (response) {
                     var data = JSON.parse(response);
+                    if(data.success == true) {
+                        if(data.destinationId) {
+                            sessionStorage.setItem("swBrowserLanguage_destinationId", data.destinationId);
+                        }
 
-                    if(data.destinationId) {
-                        sessionStorage.setItem("swBrowserLanguage_destinationId", data.destinationId);
+                        me.showModal();
                     }
-
-                    me.showModal();
                 }
             });
 
@@ -82,7 +89,6 @@
         },
 
         redirect: function(shopId) {
-
             $('<form>', {
                 'action': '',
                 'method': 'post',

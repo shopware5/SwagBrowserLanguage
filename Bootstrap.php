@@ -115,7 +115,7 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
      */
     private function createConfiguration()
     {
-        $shopFinder = new ShopFinder($this, true);
+        $shopFinder = new ShopFinder($this, $this->get("Models"));
         $subShops = $shopFinder->getSubShops();
 
         $store = array();
@@ -124,32 +124,31 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
         }
 
         $form = $this->Form();
-        $form->setElement(
-            'select',
-            'default',
-            array(
-                'label' => 'Fallback-Sprachshop',
-                'store' => 'base.ShopLanguage',
-                'scope' => Shopware\Models\Config\Element::SCOPE_SHOP,
-                'required' => true,
-                'value' => null,
-                'description' => 'Auf diesen Shop wird weitergeleitet, wenn kein zu den Browsersprachen passender Shop existiert.'
-            )
-        );
+        $form->setElement('select', 'default', array(
+            'label' => 'Fallback-Sprachshop',
+            'store' => 'base.ShopLanguage',
+            'scope' => Shopware\Models\Config\Element::SCOPE_SHOP,
+            'required' => true,
+            'value' => null,
+            'description' => 'Auf diesen Shop wird weitergeleitet, wenn kein zu den Browsersprachen passender Shop existiert.'
+        ));
 
-        $form->setElement(
-                'select',
-                'assignedShops',
-                array(
-                        'label' => 'Zugehörige Shops',
-                        'store' => 'base.ShopLanguage',
-                        'scope' => Shopware\Models\Config\Element::SCOPE_SHOP,
-                        'required' => false,
-                        'value' => null,
-                        'description' => 'Auf diese Shops wird weitergeleitet, wenn die Browsersprache der Shopsprache entspricht.',
-                        'multiSelect' => true
-                )
-        );
+        $form->setElement('select', 'assignedShops', array(
+            'label' => 'Zugehörige Shops',
+            'store' => 'base.ShopLanguage',
+            'scope' => Shopware\Models\Config\Element::SCOPE_SHOP,
+            'required' => false,
+            'value' => null,
+            'description' => 'Auf diese Shops wird weitergeleitet, wenn die Browsersprache der Shopsprache entspricht.',
+            'multiSelect' => true
+        ));
+
+        $form->setElement('text', 'fallbackLanguage', array(
+            'label' => 'Fallback-Sprache für Modal',
+            'value' => 'en_GB',
+            'required' => true,
+            'description' => 'Dies ist die locale für die Übersetzung, auf die, wenn keine passende Übersetzung für die vom Benutzer gewählte Sprache existiert, zurückgegriffen wird, um die Infobox im Frontend zu übersetzen.'
+        ));
 
         $this->translateForm();
     }
@@ -166,6 +165,10 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
                     'label' => 'Related shops',
                     'description' => 'Forwards to these shops, if the browser language equals the shop language.',
                 ),
+                'fallbackLanguage' => array(
+                    'label' => 'Fallback language for the modal',
+                    'description' => 'This is the locale for the translation that will be used by default, if no matching translation was found for the user to be displayed in the infobox in the frontend.'
+                )
             )
         );
 
@@ -258,10 +261,7 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
      */
     public function registerEvents()
     {
-        $this->subscribeEvent(
-            'Enlight_Controller_Front_StartDispatch',
-            'onStartDispatch'
-        );
+        $this->subscribeEvent('Enlight_Controller_Front_StartDispatch', 'onStartDispatch');
 
         return true;
     }
@@ -285,6 +285,7 @@ class Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap extends Shopware_C
             $this->get('events')->addSubscriber($subscriber);
         }
     }
+
     /**
      * Uninstall function of the plugin.
      * Fired from the plugin manager.
