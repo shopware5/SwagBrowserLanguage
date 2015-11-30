@@ -1,0 +1,44 @@
+{
+    "label": {
+        "de": "Automatische Sprachshop-Auswahl",
+        "en": "Automated language shop detection"
+    },
+    "copyright": "(c) by Shopware AG",
+    "license": "proprietary",
+    "link": "http://store.shopware.com",
+    "author": "Shopware AG",
+
+    "currentVersion": "1.1.0",
+
+    "changelog": {
+        "de": {
+            "1.1.0": "PT-3672 - Bugfix: Verbesserte Modalbox; PT-3878 - Bugfix: Probleme mit Internet Explorer;",
+            "1.0.9": "PT-3891 - Bugfix: Probleme nach Shopware-Update behoben",
+            "1.0.8": "PT-3617 - Bugfix: Subshop Kompatibilität;",
+            "1.0.7": "PT-3194 - Bugfix: Auswahl des richtigen Sprachshops;",
+            "1.0.6": "PT-3009 - SW5 Kompatiblität",
+            "1.0.5": "PT-2672 - Bugfix: Problem mit Google Crawling behoben",
+            "1.0.4": "Korrektur: Sucht den Sprachshop nun nach der vollen Browsersprache wie [en-US] oder [en-GB]; PT-2108 - Korrektur: Der default Shop wird nun auf Null geprüft.",
+            "1.0.3": "Korrektur: Begrenzung der weitergeleiteten Requests",
+            "1.0.2": "Korrigiert Installations-Probleme"
+        },
+        "en": {
+            "1.1.0": "PT-3672 - Bugfix: Improved modal box; PT-3878 - Bugfix: Problems with Internet Explorer;",
+            "1.0.9": "PT-3891 - Bugfix: Fixed issues after updating Shopware",
+            "1.0.8": "PT-3617 - Bugfix: Subshop compatibility;",
+            "1.0.7": "PT-3194 - Bugfix: Selection of the correct language shop;",
+            "1.0.6": "PT-3009 - SW5 compatibility",
+            "1.0.5": "PT-2672 - Bugfix: Problem with Google crawling",
+            "1.0.4": "Fix: Seek the language Shop now for full browser language as [en-US] or [en-GB]; PT-2108 - Fix. The default shop is checked for null",
+            "1.0.3": "Fix: Limit kind of request which are redirected",
+            "1.0.2": "Fixes install problems"
+        }
+    },
+
+    "compatibility": {
+        "minimumVersion": "5.0.0",
+        "maximumVersion": null,
+        "blacklist": [
+        ]
+    }
+}

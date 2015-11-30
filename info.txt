@@ -1,0 +1,13 @@
+<p>Dieses Plugin entscheidet anhand der im Browser des Kunden eingestellten Sprachen,<br>auf welchen Sprachshop der Kunde weitergeleitet wird.<br>Die Browsersprachen werden dabei Ihrer Priorität nach geprüft.</p>
+<br>
+<p>Daraus ergeben sich folgende Fälle:</p>
+<br>
+<ul>
+            <li>1. Die gegenwärtig geprüfte Browsersprache entspricht dem Hauptshop<br>-> keine Weiterleitung</li>
+            <li>2. Die gegenwärtig geprüfte Browsersprache entspricht einem Sprachshop<br>-> Weiterleitung auf den entsprechenden Sprachshop</li>
+            <li>3. Keine der Browsersprachen entspricht einem Sprachshop<br>-> Weiterleitung auf den in der Pluginkonfiguration eingestellten Fallback-Sprachshop, sofern dieser nicht dem Hauptshop entspricht, sonst keine Weiterleitung</li>
+</ul>
+<br>
+<p>Sobald zu einer Sprache ein passender Shop gefunden wurde, wird die weitere Suche beendet.</p>
+<br>
+<p>Weiterhin besteht in der Pluginkonfiguraion die Möglichkeit eine Infobox zu aktivieren. Diese zeigt dem Benutzer im Falle einer durch das Plugin verursachten Weiterleitung einen kurzen Hinweis an und bietet die Möglichkeit zurück auf den Hauptshop zu gelangen.</p>
