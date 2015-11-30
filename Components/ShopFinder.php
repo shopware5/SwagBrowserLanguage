@@ -1,4 +1,11 @@
 <?php
+/*
+ * (c) shopware AG <info@shopware.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ */
 
 namespace Shopware\SwagBrowserLanguage\Components;
 
@@ -49,7 +56,6 @@ class ShopFinder
      */
     public function getSubshopId($languages)
     {
-
         $assignedShops = $this->pluginBootstrap->get("config")->assignedShops;
         $assignedShops = array_values($assignedShops);
 
@@ -123,7 +129,6 @@ class ShopFinder
      */
     private function getDefaultShopId()
     {
-
         $default = $this->pluginBootstrap->get("config")->default;
         if (!is_int($default)) {
             $default = $this->getFirstSubshopId();
