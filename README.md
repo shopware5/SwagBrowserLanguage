@@ -1,5 +1,8 @@
 # SwagBrowserLanguage
 
+## Supported versions
+Shopware version 5.0.0 or higher
+
 ## Description
 This plugin automatically detects the language settings of your customer’s browsers and forwards them to the appropriate language or subshop. The browser languages are checked according to their priority.
 
