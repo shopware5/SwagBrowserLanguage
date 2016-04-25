@@ -147,8 +147,9 @@ class ShopFinder
     private function getSubShopIdByFullBrowserLanguage($languages, $assignedShops)
     {
         foreach ($languages as $language) {
+            $browserLanguage = strtolower($language);
+
             foreach ($this->subShops as $subshop) {
-                $browserLanguage = strtolower($language);
                 $shopLocale = strtolower($subshop['locale']);
 
                 if ($browserLanguage === $shopLocale && in_array($subshop['id'], $assignedShops)) {
@@ -169,10 +170,11 @@ class ShopFinder
     private function getSubShopIdByBrowserLanguagePrefix($languages, $assignedShops)
     {
         foreach ($languages as $language) {
+            $browserLanguage = strtolower($language);
+            $currentLanguageArray = explode('-', $browserLanguage);
+            $browserLanguagePrefix = $currentLanguageArray[0];
+            
             foreach ($this->subShops as $subshop) {
-                $browserLanguage = strtolower($language);
-                $currentLanguageArray = explode('-', $browserLanguage);
-                $browserLanguagePrefix = $currentLanguageArray[0];
                 $subshopLanguage = $subshop['language'];
 
                 if ($browserLanguagePrefix === $subshopLanguage && in_array($subshop['id'], $assignedShops)) {
