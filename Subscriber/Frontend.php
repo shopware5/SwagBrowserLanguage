@@ -12,7 +12,6 @@ namespace Shopware\SwagBrowserLanguage\Subscriber;
 use Enlight\Event\SubscriberInterface;
 use Enlight_Event_EventArgs;
 use Enlight_View_Default;
-use Shopware\SwagBrowserLanguage\Components\BotDetector;
 use Shopware_Controllers_Frontend_Index;
 use Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap;
 use Zend_Controller_Request_Http;
