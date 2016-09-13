@@ -8,7 +8,7 @@
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
 
-    "currentVersion": "1.1.0",
+    "currentVersion": "1.1.1",
 
     "compatibility": {
         "minimumVersion": "5.0.0",

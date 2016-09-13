@@ -6,12 +6,13 @@
  * file that was distributed with this source code.
  *
  */
-
+require_once dirname(dirname(__DIR__)) . '/Components/CSRFWhitelistAware.php';
 use Shopware\SwagBrowserLanguage\Components\ShopFinder;
 use Shopware\SwagBrowserLanguage\Components\Translator;
 use Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap as Bootstrap;
+use Shopware\Components\CSRFWhitelistAware;
 
-class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controller_Action
+class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controller_Action implements CSRFWhitelistAware
 {
     /**
      * @var array $controllerWhiteList
@@ -42,6 +43,18 @@ class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controlle
      * @var \Shopware\Models\Shop\Shop null
      */
     private $shop = null;
+
+    /**
+     * Returns a list with actions which should not be validated for CSRF protection
+     *
+     * @return string[]
+     */
+    public function getWhitelistedCSRFActions()
+    {
+        return [
+            'redirect',
+        ];
+    }
 
     /**
      * This function will be called before the widget is being finalized
