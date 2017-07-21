@@ -6,11 +6,10 @@
  * file that was distributed with this source code.
  *
  */
-require_once dirname(dirname(__DIR__)) . '/Components/CSRFWhitelistAware.php';
-use Shopware\SwagBrowserLanguage\Components\ShopFinder;
-use Shopware\SwagBrowserLanguage\Components\Translator;
-use Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap as Bootstrap;
+
 use Shopware\Components\CSRFWhitelistAware;
+use SwagBrowserLanguage\Components\ShopFinder;
+use SwagBrowserLanguage\Components\Translator;
 
 class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controller_Action implements CSRFWhitelistAware
 {
@@ -23,11 +22,6 @@ class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controlle
      * @var ShopFinder $shopFinder
      */
     private $shopFinder = null;
-
-    /**
-     * @var Bootstrap $pluginBootstrap
-     */
-    private $pluginBootstrap = null;
 
     /**
      * @var Enlight_Components_Session_Namespace
@@ -61,11 +55,12 @@ class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controlle
      */
     public function preDispatch()
     {
-        $this->pluginBootstrap = $this->get('plugins')->Frontend()->SwagBrowserLanguage();
-        $this->shopFinder = new ShopFinder($this->pluginBootstrap, $this->getModelManager());
-        $this->translator = new Translator($this->pluginBootstrap, $this->getModelManager(), $this->get("snippets"), $this->get("db"));
+        $this->shopFinder = $this->get('swag_browser_language.components.shop_finder');
+        $this->translator = $this->get('swag_browser_language.components.translator');
         $this->session = $this->get("session");
         $this->shop = $this->get("shop");
+
+        $this->View()->addTemplateDir($this->container->getParameter('swag_browser_language.view_dir'));
 
         parent::preDispatch();
     }
@@ -192,12 +187,11 @@ class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controlle
         $languages = $this->getBrowserLanguages($request);
         $subShopId = $this->shopFinder->getSubshopId($languages);
 
-        $assignedShops = $this->pluginBootstrap->Config()->get("assignedShops");
+        $assignedShops = $this->get('shopware.plugin.cached_config_reader')->getByPluginName('SwagBrowserLanguage')["assignedShops"];
         $shopsToDisplay = $this->shopFinder->getShopsForModal($assignedShops);
 
         $snippets = $this->translator->getSnippets($languages);
 
-        $this->View()->loadTemplate('responsive/frontend/plugins/swag_browser_language/modal.tpl');
         $this->View()->assign("snippets", $snippets);
         $this->View()->assign("shops", $shopsToDisplay);
         $this->View()->assign("destinationShop", $this->shopFinder->getShopRepository($subShopId)->getName());

@@ -7,47 +7,43 @@
  *
  */
 
-namespace Shopware\SwagBrowserLanguage\Components;
+namespace SwagBrowserLanguage\Components;
 
+use Enlight_Components_Db_Adapter_Pdo_Mysql;
 use Enlight_Components_Snippet_Namespace;
+use Shopware\Components\Model\ModelManager;
+use Shopware_Components_Snippet_Manager;
 use Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap;
 
 class Translator
 {
     /**
-     * @var Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap $pluginBootstrap
-     */
-    private $pluginBootstrap;
-
-    /**
      * Returns doctrine instance
      *
-     * @var \Shopware\Components\Model\ModelManager
+     * @var ModelManager
      */
     private $models;
 
     /**
      * Returns the instance of the snippet manager
      *
-     * @var \Shopware_Components_Snippet_Manager
+     * @var Shopware_Components_Snippet_Manager
      */
     private $snippets;
 
     /**
-     * @var \Enlight_Components_Db_Adapter_Pdo_Mysql
+     * @var Enlight_Components_Db_Adapter_Pdo_Mysql
      */
-    private $db = null;
+    private $db;
 
     /**
      * The constructor for this class.
-     * @param Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap $bootstrap
-     * @param \Shopware\Components\Model\ModelManager $models
-     * @param \Shopware_Components_Snippet_Manager $snippets
-     * @param \Enlight_Components_Db_Adapter_Pdo_Mysql $db
+     * @param ModelManager $models
+     * @param Shopware_Components_Snippet_Manager $snippets
+     * @param Enlight_Components_Db_Adapter_Pdo_Mysql $db
      */
-    public function __construct($bootstrap, $models, $snippets, $db)
+    public function __construct(ModelManager $models, Shopware_Components_Snippet_Manager $snippets, Enlight_Components_Db_Adapter_Pdo_Mysql $db)
     {
-        $this->pluginBootstrap = $bootstrap;
         $this->models = $models;
         $this->snippets = $snippets;
         $this->db = $db;
