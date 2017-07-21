@@ -139,13 +139,6 @@ class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controlle
             $languages[$key] = $language[0];
         }
 
-        if (count($languages) > 3) {
-            $languages = [
-                $languages[0],
-                $languages[1],
-            ];
-        }
-
         return (array)$languages;
     }
 
