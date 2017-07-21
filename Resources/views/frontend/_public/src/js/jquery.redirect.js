@@ -41,27 +41,28 @@
                 return;
             }
 
-            $.modal.open(url, {
-                title: me.opts.modalTitle,
-                mode: 'ajax',
-                sizing: 'content'
-            });
+            $.get(url, function (response) {
+                $.modal.open(response.content, {
+                    title: response.title,
+                    sizing: 'content'
+                });
 
-            $($.modal._$modalBox).one('click.swag_browser_language', '.modal--close-button', function () {
-                $.modal.close();
-            });
+                $($.modal._$modalBox).one('click.swag_browser_language', '.modal--close-button', function () {
+                    $.modal.close();
+                });
 
-            $($.modal._$modalBox).one('click.swag_browser_language', '.modal--go-button', function () {
-                me.redirect(sessionStorage.getItem("swBrowserLanguage_destinationId"));
-            });
+                $($.modal._$modalBox).one('click.swag_browser_language', '.modal--go-button', function () {
+                    me.redirect(sessionStorage.getItem("swBrowserLanguage_destinationId"));
+                });
 
-            $($.modal._$modalBox).on('change.swag_browser_language', '*[name="modal--combo-shops"]', function (event) {
-                var $this = $(event.target),
-                    val = $this.val();
+                $($.modal._$modalBox).on('change.swag_browser_language', '*[name="modal--combo-shops"]', function (event) {
+                    var $this = $(event.target),
+                        val = $this.val();
 
-                sessionStorage.setItem("swBrowserLanguage_destinationId", val);
-                me.redirect(val);
-            });
+                    sessionStorage.setItem("swBrowserLanguage_destinationId", val);
+                    me.redirect(val);
+                });
+            }, 'json');
         },
 
         handleRedirect: function() {
@@ -75,7 +76,7 @@
                 url: me.$el.attr('data-redirectUrl'),
                 success: function (response) {
                     var data = JSON.parse(response);
-                    if(data.success == true) {
+                    if(data.success === true) {
                         if(data.destinationId) {
                             sessionStorage.setItem("swBrowserLanguage_destinationId", data.destinationId);
                         }

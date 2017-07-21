@@ -183,6 +183,7 @@ class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controlle
      */
     public function getModalAction()
     {
+        $this->get('Front')->Plugins()->ViewRenderer()->setNoRender();
         $request = $this->Request();
         $languages = $this->getBrowserLanguages($request);
         $subShopId = $this->shopFinder->getSubshopId($languages);
@@ -196,5 +197,10 @@ class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controlle
         $this->View()->assign("shops", $shopsToDisplay);
         $this->View()->assign("destinationShop", $this->shopFinder->getShopRepository($subShopId)->getName());
         $this->View()->assign("destinationId", $subShopId);
+
+        echo json_encode([
+            'title' => $snippets['title'],
+            'content' => $this->View()->fetch('widgets/swag_browser_language/get_modal.tpl')
+        ]);
     }
 }

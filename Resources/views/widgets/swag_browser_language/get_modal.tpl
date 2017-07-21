@@ -10,11 +10,13 @@
 		{block name="frontend_index_browser_language_modal_subShops"}
 			{$snippets.choose}
 			<form name="modal--shops">
-				<select name="modal--combo-shops" class="language--select modal--language-select">
-					{foreach $shops as $key => $shop}
-						<option value="{$key}" {if $destinationId===$key}selected="selected"{/if}>{$shop}</option>
-					{/foreach}
-				</select>
+				<div class="select-field">
+					<select name="modal--combo-shops" class="language--select modal--language-select">
+						{foreach $shops as $key => $shop}
+							<option value="{$key}" {if $destinationId===$key}selected="selected"{/if}>{$shop}</option>
+						{/foreach}
+					</select>
+				</div>
 			</form>
 			<br/>
 		{/block}
