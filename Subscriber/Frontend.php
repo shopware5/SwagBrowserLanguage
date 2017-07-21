@@ -91,12 +91,6 @@ class Frontend implements SubscriberInterface
         /** @var $view Enlight_View_Default */
         $view = $controller->View();
 
-        $version = Shopware()->Shop()->getTemplate()->getVersion();
-        if ($version >= 3) {
-            $view->addTemplateDir($this->pluginBootstrap->Path() . '/Views/responsive');
-        } else {
-            $view->addTemplateDir($this->pluginBootstrap->Path() . '/Views/emotion', 'swag_browser_language');
-            $view->extendsTemplate('frontend/plugins/swag_browser_language/index.tpl');
-        }
+        $view->addTemplateDir($this->pluginBootstrap->Path() . '/Views/responsive');
     }
 }
