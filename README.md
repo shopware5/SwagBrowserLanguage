@@ -1,6 +1,7 @@
 # SwagBrowserLanguage
-> Working with Shopware version 5.0.0 to 5.2.6.
+> Working with Shopware version 5.2.0 to 5.2.27.
 > Higher versions may work either but were not tested.
+> Use the version 1.1.1 for older Shopware versions
 
 ## Description
 This plugin automatically detects the language settings of your customer’s browsers and forwards them to the appropriate language or subshop. The browser languages are checked according to their priority.

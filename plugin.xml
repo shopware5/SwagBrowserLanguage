@@ -1,3 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<plugin xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../engine/Shopware/Components/Plugin/schema/plugin.xsd">
+    <label lang="de">Automatische Sprachshop-Auswahl</label>
+    <label lang="en">Automated language shop detection</label>
+    <version>1.2.0</version>
+    <copyright>Shopware AG</copyright>
+    <license>MIT</license>
+    <description>
+        <![CDATA[
 <p>Dieses Plugin entscheidet anhand der im Browser des Kunden eingestellten Sprachen,<br>auf welchen Sprachshop der Kunde weitergeleitet wird.<br>Die Browsersprachen werden dabei Ihrer Priorität nach geprüft.</p>
 <br>
 <p>Daraus ergeben sich folgende Fälle:</p>
@@ -11,3 +21,8 @@
 <p>Sobald zu einer Sprache ein passender Shop gefunden wurde, wird die weitere Suche beendet.</p>
 <br>
 <p>Weiterhin besteht in der Pluginkonfiguraion die Möglichkeit eine Infobox zu aktivieren. Diese zeigt dem Benutzer im Falle einer durch das Plugin verursachten Weiterleitung einen kurzen Hinweis an und bietet die Möglichkeit zurück auf den Hauptshop zu gelangen.</p>
+        ]]>
+    </description>
+    <link>http://store.shopware.com</link>
+    <author>Shopware AG</author>
+</plugin>

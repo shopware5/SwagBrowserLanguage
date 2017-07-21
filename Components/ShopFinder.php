@@ -7,45 +7,45 @@
  *
  */
 
-namespace Shopware\SwagBrowserLanguage\Components;
+namespace SwagBrowserLanguage\Components;
 
-use Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap;
+use Shopware\Components\Model\ModelManager;
+use Shopware\Components\Plugin\CachedConfigReader;
+use Shopware\Models\Shop\Repository;
+use Shopware\Models\Shop\Shop;
 
+/**
+ * Class ShopFinder
+ * @package SwagBrowserLanguage\Components
+ */
 class ShopFinder
 {
-    /**
-     * @var Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap $pluginBootstrap
-     */
-    private $pluginBootstrap;
-
     /**
      * @var array $subShops
      */
     private $subShops;
 
     /**
-     * @var bool $isBackend
-     */
-    private $isBackend;
-
-    /**
-     * @var \Shopware\Components\Model\ModelManager
+     * @var ModelManager
      */
     private $models;
 
     /**
+     * @var array
+     */
+    private $pluginConfig = [];
+
+    /**
      * the constructor of this class
      *
-     * @param Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap $pluginBootstrap
-     * @param \Shopware\Components\Model\ModelManager $models
-     * @param bool $isBackend
+     * @param ModelManager $models
+     * @param CachedConfigReader $configReader
      */
-    public function __construct($pluginBootstrap, $models, $isBackend = false)
+    public function __construct(ModelManager $models, CachedConfigReader $configReader)
     {
-        $this->pluginBootstrap = $pluginBootstrap;
-        $this->isBackend = $isBackend;
         $this->models = $models;
         $this->subShops = $this->getLanguageShops();
+        $this->pluginConfig = $configReader->getByPluginName('SwagBrowserLanguage');
     }
 
     /**
@@ -56,8 +56,7 @@ class ShopFinder
      */
     public function getSubshopId($languages)
     {
-        $assignedShops = $this->pluginBootstrap->get("config")->assignedShops;
-        $assignedShops = array_values($assignedShops);
+        $assignedShops = array_values($this->pluginConfig['assignedShops']);
 
         if (!$assignedShops) {
             return $this->getDefaultShopId();
@@ -97,12 +96,12 @@ class ShopFinder
 
     /**
      * @param $subshopId
-     * @return \Shopware\Models\Shop\Shop
+     * @return Shop
      */
     public function getShopRepository($subshopId)
     {
-        /** @var \Shopware\Models\Shop\Repository $repository */
-        $repository = $this->models->getRepository('Shopware\Models\Shop\Shop');
+        /** @var Repository $repository */
+        $repository = $this->models->getRepository(Shop::class);
         return $repository->getActiveById($subshopId);
     }
 
@@ -129,7 +128,7 @@ class ShopFinder
      */
     private function getDefaultShopId()
     {
-        $default = $this->pluginBootstrap->get("config")->default;
+        $default = $this->pluginConfig['default'];
         if (!is_int($default)) {
             $default = $this->getFirstSubshopId();
         }
@@ -193,7 +192,7 @@ class ShopFinder
     private function getLanguageShops()
     {
         $data = $this->getData();
-        $subshops = array();
+        $subshops = [];
 
         foreach ($data as $subshop) {
             $subshop['locale'] = strtolower($subshop['locale']['locale']);
@@ -202,12 +201,12 @@ class ShopFinder
             $subshop['language'] = explode('-', $subshop['locale']);
             $subshop['language'] = $subshop['language'][0];
 
-            $subshops[] = array(
+            $subshops[] = [
                 'id' => $subshop['id'],
                 'name' => $subshop['name'],
                 'locale' => $subshop['locale'],
                 'language' => $subshop['language']
-            );
+            ];
         }
         return $subshops;
     }
@@ -219,7 +218,7 @@ class ShopFinder
     private function getData()
     {
         /** @var \Shopware\Models\Shop\Repository $repository */
-        $repository = $this->models->getRepository('Shopware\Models\Shop\Shop');
+        $repository = $this->models->getRepository(Shop::class);
         $builder = $repository->getActiveQueryBuilder();
         $builder->orderBy('shop.id');
 

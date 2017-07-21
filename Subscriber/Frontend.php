@@ -7,7 +7,7 @@
  *
  */
 
-namespace Shopware\SwagBrowserLanguage\Subscriber;
+namespace SwagBrowserLanguage\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
 use Enlight_Event_EventArgs;
@@ -16,12 +16,16 @@ use Shopware_Controllers_Frontend_Index;
 use Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap;
 use Zend_Controller_Request_Http;
 
+/**
+ * Class Frontend
+ * @package SwagBrowserLanguage\Subscriber
+ */
 class Frontend implements SubscriberInterface
 {
     /**
-     * @var Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap $pluginBootstrap
+     * @var string
      */
-    private $pluginBootstrap;
+    private $pluginDir;
 
     /**
      * @var array $controllerWhiteList
@@ -29,13 +33,12 @@ class Frontend implements SubscriberInterface
     private $controllerWhiteList = array('detail', 'index', 'listing');
 
     /**
-     * the constructor of the frontendSubscriber
-     *
-     * @param Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap $pluginBootstrap
+     * Frontend constructor.
+     * @param string $pluginDir
      */
-    public function __construct(Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap $pluginBootstrap)
+    public function __construct($pluginDir)
     {
-        $this->pluginBootstrap = $pluginBootstrap;
+        $this->pluginDir = $pluginDir;
     }
 
     /**
@@ -45,10 +48,10 @@ class Frontend implements SubscriberInterface
      */
     public static function getSubscribedEvents()
     {
-        return array(
+        return [
             'Enlight_Controller_Dispatcher_ControllerPath_Widgets_SwagBrowserLanguage' => 'onGetFrontendController',
             'Enlight_Controller_Action_PostDispatchSecure_Frontend' => 'onPostDispatchFrontend'
-        );
+        ];
     }
 
     /**
@@ -58,11 +61,7 @@ class Frontend implements SubscriberInterface
      */
     public function onGetFrontendController()
     {
-        $this->pluginBootstrap->Application()->Snippets()->addConfigDir($this->pluginBootstrap->Path() . 'Snippets/');
-
-        $this->pluginBootstrap->Application()->Template()->addTemplateDir($this->pluginBootstrap->Path() . 'Views/');
-
-        return $this->pluginBootstrap->Path() . 'Controllers/Widgets/SwagBrowserLanguage.php';
+        return $this->pluginDir . '/Controllers/Widgets/SwagBrowserLanguage.php';
     }
 
     /**
@@ -75,28 +74,16 @@ class Frontend implements SubscriberInterface
         /** @var $controller Shopware_Controllers_Frontend_Index */
         $controller = $arguments->getSubject();
 
-        /** @var $request Zend_Controller_Request_Http */
+        /** @var \Enlight_Controller_Request_RequestHttp $request */
         $request = $controller->Request();
 
         if (!in_array($request->getControllerName(), $this->controllerWhiteList)) {
             return;
         }
 
-        $assignedShops = $this->pluginBootstrap->Config()->get("assignedShops");
-
-        if (empty($assignedShops)) {
-            return;
-        }
-
         /** @var $view Enlight_View_Default */
         $view = $controller->View();
 
-        $version = Shopware()->Shop()->getTemplate()->getVersion();
-        if ($version >= 3) {
-            $view->addTemplateDir($this->pluginBootstrap->Path() . '/Views/responsive');
-        } else {
-            $view->addTemplateDir($this->pluginBootstrap->Path() . '/Views/emotion', 'swag_browser_language');
-            $view->extendsTemplate('frontend/plugins/swag_browser_language/index.tpl');
-        }
+        $view->addTemplateDir($this->pluginDir . '/Resources/views');
     }
 }
