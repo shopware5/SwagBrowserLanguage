@@ -1,5 +1,5 @@
 # SwagBrowserLanguage
-> Working with Shopware version 5.0.0 to 5.2.6.
+> Working with Shopware version 5.2.0 to 5.2.27.
 > Higher versions may work either but were not tested.
 
 ## Description
