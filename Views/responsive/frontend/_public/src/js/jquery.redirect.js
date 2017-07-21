@@ -92,11 +92,23 @@
             $('<form>', {
                 'action': '',
                 'method': 'post',
-                'html': $('<input>', {
-                    'type': 'hidden',
-                    'value': shopId,
-                    'name': '__shop'
-                })
+                'html': [
+                    $('<input>', {
+                        'type': 'hidden',
+                        'value': shopId,
+                        'name': '__shop'
+                    }),
+                    $('<input>', {
+                        'type': 'hidden',
+                        'value': 1,
+                        'name': '__redirect'
+                    }),
+                    $('<input>', {
+                        'type': 'hidden',
+                        'value': CSRF.getToken(),
+                        'name': '__csrf_token'
+                    })
+                ]
             }).appendTo('body').submit();
         },
 
