@@ -37,6 +37,9 @@ class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controlle
      * @var \Shopware\Models\Shop\Shop null
      */
     private $shop = null;
+
+    /** @var array */
+    private $config = null;
     
     /**
      * Returns a list with actions which should not be validated for CSRF protection
@@ -139,6 +142,13 @@ class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controlle
             $languages[$key] = $language[0];
         }
 
+        if ($this->getPluginConfig()['forceBrowserMainLocale'] && count($languages) > 2) {
+            $languages = [
+                $languages[0],
+                $languages[1],
+            ];
+        }
+
         return (array)$languages;
     }
 
@@ -172,6 +182,18 @@ class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controlle
     }
 
     /**
+     * @return array|mixed
+     */
+    private function getPluginConfig()
+    {
+        if ($this->config === null) {
+            $this->config = $this->get('shopware.plugin.cached_config_reader')->getByPluginName('SwagBrowserLanguage');
+        }
+
+        return $this->config;
+    }
+
+    /**
      * This action displays the content of the modal box
      */
     public function getModalAction()
@@ -181,7 +203,7 @@ class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controlle
         $languages = $this->getBrowserLanguages($request);
         $subShopId = $this->shopFinder->getSubshopId($languages);
 
-        $assignedShops = $this->get('shopware.plugin.cached_config_reader')->getByPluginName('SwagBrowserLanguage')["assignedShops"];
+        $assignedShops = $this->getPluginConfig()["assignedShops"];
         $shopsToDisplay = $this->shopFinder->getShopsForModal($assignedShops);
 
         $snippets = $this->translator->getSnippets($languages);
