@@ -3,24 +3,39 @@
         xsi:noNamespaceSchemaLocation="../../../engine/Shopware/Components/Plugin/schema/plugin.xsd">
     <label lang="de">Automatische Sprachshop-Auswahl</label>
     <label lang="en">Automated language shop detection</label>
-    <version>1.2.0</version>
+    <version>2.0.0</version>
     <copyright>Shopware AG</copyright>
     <license>MIT</license>
-    <description>
+    <description lang="de">
         <![CDATA[
 <p>Dieses Plugin entscheidet anhand der im Browser des Kunden eingestellten Sprachen,<br>auf welchen Sprachshop der Kunde weitergeleitet wird.<br>Die Browsersprachen werden dabei Ihrer Priorität nach geprüft.</p>
 <br>
 <p>Daraus ergeben sich folgende Fälle:</p>
 <br>
 <ul>
-            <li>1. Die gegenwärtig geprüfte Browsersprache entspricht dem Hauptshop<br>-> keine Weiterleitung</li>
-            <li>2. Die gegenwärtig geprüfte Browsersprache entspricht einem Sprachshop<br>-> Weiterleitung auf den entsprechenden Sprachshop</li>
-            <li>3. Keine der Browsersprachen entspricht einem Sprachshop<br>-> Weiterleitung auf den in der Pluginkonfiguration eingestellten Fallback-Sprachshop, sofern dieser nicht dem Hauptshop entspricht, sonst keine Weiterleitung</li>
+    <li>Die gegenwärtig geprüfte Browsersprache entspricht dem Hauptshop<br>-> keine Weiterleitung</li>
+    <li>Die gegenwärtig geprüfte Browsersprache entspricht einem Sprachshop<br>-> Weiterleitung auf den entsprechenden Sprachshop</li>
+    <li>Keine der Browsersprachen entspricht einem Sprachshop<br>-> Weiterleitung auf den in der Pluginkonfiguration eingestellten Fallback-Sprachshop, sofern dieser nicht dem Hauptshop entspricht, sonst keine Weiterleitung</li>
 </ul>
 <br>
 <p>Sobald zu einer Sprache ein passender Shop gefunden wurde, wird die weitere Suche beendet.</p>
 <br>
 <p>Weiterhin besteht in der Pluginkonfiguraion die Möglichkeit eine Infobox zu aktivieren. Diese zeigt dem Benutzer im Falle einer durch das Plugin verursachten Weiterleitung einen kurzen Hinweis an und bietet die Möglichkeit zurück auf den Hauptshop zu gelangen.</p>
+        ]]>
+    </description>
+    <description lang="en">
+        <![CDATA[
+<p>This plugin automatically detects the language settings of your customer’s browsers and forwards them to the appropriate language or subshop. The browser languages are checked according to their priority.</p>
+<br>
+<p>The following situations can occur:</p>
+<br>
+<ul>
+    <li>The browser language corresponds to the language of your main shop (no forwarding)</li>
+    <li>The browser language matches one of the languages offered in your store (forwarded to the appropriate shop)</li>
+    <li>The browser language does not match any of the languages offered in your store (forwarded to the main shop, unless otherwise specified)</li>
+    <li>The browser language matches one of the subshops but the subshop has not been linked to the main shop (forwarded to the default shop)</li>
+    <li>In addition the user will be informed about the redirection before he's being redirected so he can cancel the redirection process manually at any time to stay at the current shop. Beside the proposal it is possible for the user to decide another shop than the suggested one.</li>
+<ul>
         ]]>
     </description>
     <link>http://store.shopware.com</link>
