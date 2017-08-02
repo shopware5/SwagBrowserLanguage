@@ -1,4 +1,4 @@
-;(function ($, undefined) {
+;(function ($) {
     var sessionStorage = StorageManager.getSessionStorage();
 
     $.plugin('swRedirectLang', {
@@ -24,7 +24,7 @@
 
             $.subscribe('plugin/swModal/onOpenAjax', $.proxy(me.onOpenModal, me));
 
-            if(!sessionStorage.getItem('swBrowserLanguage_redirected')) {
+            if (!sessionStorage.getItem('swBrowserLanguage_redirected')) {
                 me.handleRedirect();
             }
         },
@@ -52,14 +52,14 @@
                 });
 
                 $($.modal._$modalBox).one('click.swag_browser_language', '.modal--go-button', function () {
-                    me.redirect(sessionStorage.getItem("swBrowserLanguage_destinationId"));
+                    me.redirect(sessionStorage.getItem('swBrowserLanguage_destinationId'));
                 });
 
                 $($.modal._$modalBox).on('change.swag_browser_language', '*[name="modal--combo-shops"]', function (event) {
                     var $this = $(event.target),
                         val = $this.val();
 
-                    sessionStorage.setItem("swBrowserLanguage_destinationId", val);
+                    sessionStorage.setItem('swBrowserLanguage_destinationId', val);
                     me.redirect(val);
                 });
             }, 'json');
@@ -68,7 +68,7 @@
         handleRedirect: function() {
             var me = this;
 
-            sessionStorage.setItem("swBrowserLanguage_redirected", true);
+            sessionStorage.setItem('swBrowserLanguage_redirected', true);
 
             $.ajax({
                 method: 'post',
@@ -76,9 +76,9 @@
                 url: me.$el.attr('data-redirectUrl'),
                 success: function (response) {
                     var data = JSON.parse(response);
-                    if(data.success === true) {
-                        if(data.destinationId) {
-                            sessionStorage.setItem("swBrowserLanguage_destinationId", data.destinationId);
+                    if (data.success === true) {
+                        if (data.destinationId) {
+                            sessionStorage.setItem('swBrowserLanguage_destinationId', data.destinationId);
                         }
 
                         me.showModal();

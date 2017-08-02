@@ -1,10 +1,9 @@
 <?php
-/*
+/**
  * (c) shopware AG <info@shopware.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
- *
  */
 
 namespace SwagBrowserLanguage\Subscriber;
@@ -13,13 +12,7 @@ use Enlight\Event\SubscriberInterface;
 use Enlight_Event_EventArgs;
 use Enlight_View_Default;
 use Shopware_Controllers_Frontend_Index;
-use Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap;
-use Zend_Controller_Request_Http;
 
-/**
- * Class Frontend
- * @package SwagBrowserLanguage\Subscriber
- */
 class Frontend implements SubscriberInterface
 {
     /**
@@ -28,12 +21,11 @@ class Frontend implements SubscriberInterface
     private $pluginDir;
 
     /**
-     * @var array $controllerWhiteList
+     * @var array
      */
-    private $controllerWhiteList = array('detail', 'index', 'listing');
+    private $controllerWhiteList = ['detail', 'index', 'listing'];
 
     /**
-     * Frontend constructor.
      * @param string $pluginDir
      */
     public function __construct($pluginDir)
@@ -42,15 +34,13 @@ class Frontend implements SubscriberInterface
     }
 
     /**
-     * method to register the eventHandler
-     *
-     * @return array
+     * {@inheritdoc}
      */
     public static function getSubscribedEvents()
     {
         return [
             'Enlight_Controller_Dispatcher_ControllerPath_Widgets_SwagBrowserLanguage' => 'onGetFrontendController',
-            'Enlight_Controller_Action_PostDispatchSecure_Frontend' => 'onPostDispatchFrontend'
+            'Enlight_Controller_Action_PostDispatchSecure_Frontend' => 'onPostDispatchFrontend',
         ];
     }
 
@@ -72,7 +62,7 @@ class Frontend implements SubscriberInterface
     public function onPostDispatchFrontend(Enlight_Event_EventArgs $arguments)
     {
         /** @var $controller Shopware_Controllers_Frontend_Index */
-        $controller = $arguments->getSubject();
+        $controller = $arguments->get('subject');
 
         /** @var \Enlight_Controller_Request_RequestHttp $request */
         $request = $controller->Request();

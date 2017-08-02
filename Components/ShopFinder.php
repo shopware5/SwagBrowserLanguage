@@ -1,10 +1,9 @@
 <?php
-/*
+/**
  * (c) shopware AG <info@shopware.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
- *
  */
 
 namespace SwagBrowserLanguage\Components;
@@ -14,14 +13,10 @@ use Shopware\Components\Plugin\CachedConfigReader;
 use Shopware\Models\Shop\Repository;
 use Shopware\Models\Shop\Shop;
 
-/**
- * Class ShopFinder
- * @package SwagBrowserLanguage\Components
- */
 class ShopFinder
 {
     /**
-     * @var array $subShops
+     * @var array
      */
     private $subShops;
 
@@ -33,12 +28,10 @@ class ShopFinder
     /**
      * @var array
      */
-    private $pluginConfig = [];
+    private $pluginConfig;
 
     /**
-     * the constructor of this class
-     *
-     * @param ModelManager $models
+     * @param ModelManager       $models
      * @param CachedConfigReader $configReader
      */
     public function __construct(ModelManager $models, CachedConfigReader $configReader)
@@ -49,9 +42,10 @@ class ShopFinder
     }
 
     /**
-     * Helper function to get the SubshopId of the Shop in the prefered language
+     * Helper function to get the SubshopId of the Shop in the preferred language
      *
      * @param $languages
+     *
      * @return mixed
      */
     public function getSubshopId($languages)
@@ -96,23 +90,27 @@ class ShopFinder
 
     /**
      * @param $subshopId
+     *
      * @return Shop
      */
     public function getShopRepository($subshopId)
     {
         /** @var Repository $repository */
         $repository = $this->models->getRepository(Shop::class);
+
         return $repository->getActiveById($subshopId);
     }
 
     /**
      * Helper method that creates an array of shop information that may be used in the modal box.
+     *
      * @param $subShopIds
+     *
      * @return array
      */
     public function getShopsForModal($subShopIds)
     {
-        $resultArray = array();
+        $resultArray = [];
         foreach ($subShopIds as $subShopId) {
             $model = $this->getShopRepository($subShopId);
             $resultArray[$subShopId] = $model->getName();
@@ -141,6 +139,7 @@ class ShopFinder
      *
      * @param $languages
      * @param $assignedShops
+     *
      * @return bool
      */
     private function getSubShopIdByFullBrowserLanguage($languages, $assignedShops)
@@ -152,10 +151,11 @@ class ShopFinder
                 $shopLocale = strtolower($subshop['locale']);
 
                 if ($browserLanguage === $shopLocale && in_array($subshop['id'], $assignedShops)) {
-                    return ($subshop['id']);
+                    return $subshop['id'];
                 }
             }
         }
+
         return false;
     }
 
@@ -164,6 +164,7 @@ class ShopFinder
      *
      * @param $languages
      * @param $assignedShops
+     *
      * @return bool
      */
     private function getSubShopIdByBrowserLanguagePrefix($languages, $assignedShops)
@@ -172,15 +173,16 @@ class ShopFinder
             $browserLanguage = strtolower($language);
             $currentLanguageArray = explode('-', $browserLanguage);
             $browserLanguagePrefix = $currentLanguageArray[0];
-            
+
             foreach ($this->subShops as $subshop) {
                 $subshopLanguage = $subshop['language'];
 
                 if ($browserLanguagePrefix === $subshopLanguage && in_array($subshop['id'], $assignedShops)) {
-                    return ($subshop['id']);
+                    return $subshop['id'];
                 }
             }
         }
+
         return false;
     }
 
@@ -205,19 +207,21 @@ class ShopFinder
                 'id' => $subshop['id'],
                 'name' => $subshop['name'],
                 'locale' => $subshop['locale'],
-                'language' => $subshop['language']
+                'language' => $subshop['language'],
             ];
         }
+
         return $subshops;
     }
 
     /**
      * Helper function that queries all sub shops (including language sub shops).
+     *
      * @return array
      */
     private function getData()
     {
-        /** @var \Shopware\Models\Shop\Repository $repository */
+        /** @var Repository $repository */
         $repository = $this->models->getRepository(Shop::class);
         $builder = $repository->getActiveQueryBuilder();
         $builder->orderBy('shop.id');

@@ -34,7 +34,7 @@
             <label>Use browser main locale only</label>
             <label lang="de">Browser-Hauptlokalisierung erzwingen</label>
             <value>0</value>
-            <description>Addional locales on browser language will be ignored</description>
+            <description>Additional locales on browser language will be ignored</description>
             <description lang="de">Zusätzliche Lokalisierungen werden in der Browsersprache ignoriert</description>
         </element>
     </elements>
