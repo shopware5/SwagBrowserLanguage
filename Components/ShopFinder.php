@@ -1,57 +1,56 @@
 <?php
+/**
+ * (c) shopware AG <info@shopware.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
-namespace Shopware\SwagBrowserLanguage\Components;
+namespace SwagBrowserLanguage\Components;
 
-use Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap;
+use Shopware\Components\Model\ModelManager;
+use Shopware\Components\Plugin\CachedConfigReader;
+use Shopware\Models\Shop\Repository;
+use Shopware\Models\Shop\Shop;
 
 class ShopFinder
 {
     /**
-     * @var Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap $pluginBootstrap
-     */
-    private $pluginBootstrap;
-
-    /**
-     * @var array $subShops
+     * @var array
      */
     private $subShops;
 
     /**
-     * @var bool $isBackend
-     */
-    private $isBackend;
-
-    /**
-     * @var \Shopware\Components\Model\ModelManager
+     * @var ModelManager
      */
     private $models;
 
     /**
-     * the constructor of this class
-     *
-     * @param Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap $pluginBootstrap
-     * @param \Shopware\Components\Model\ModelManager $models
-     * @param bool $isBackend
+     * @var array
      */
-    public function __construct($pluginBootstrap, $models, $isBackend = false)
+    private $pluginConfig;
+
+    /**
+     * @param ModelManager       $models
+     * @param CachedConfigReader $configReader
+     */
+    public function __construct(ModelManager $models, CachedConfigReader $configReader)
     {
-        $this->pluginBootstrap = $pluginBootstrap;
-        $this->isBackend = $isBackend;
         $this->models = $models;
         $this->subShops = $this->getLanguageShops();
+        $this->pluginConfig = $configReader->getByPluginName('SwagBrowserLanguage');
     }
 
     /**
-     * Helper function to get the SubshopId of the Shop in the prefered language
+     * Helper function to get the SubshopId of the Shop in the preferred language
      *
      * @param $languages
+     *
      * @return mixed
      */
     public function getSubshopId($languages)
     {
-
-        $assignedShops = $this->pluginBootstrap->get("config")->assignedShops;
-        $assignedShops = array_values($assignedShops);
+        $assignedShops = array_values($this->pluginConfig['assignedShops']);
 
         if (!$assignedShops) {
             return $this->getDefaultShopId();
@@ -91,23 +90,27 @@ class ShopFinder
 
     /**
      * @param $subshopId
-     * @return \Shopware\Models\Shop\Shop
+     *
+     * @return Shop
      */
     public function getShopRepository($subshopId)
     {
-        /** @var \Shopware\Models\Shop\Repository $repository */
-        $repository = $this->models->getRepository('Shopware\Models\Shop\Shop');
+        /** @var Repository $repository */
+        $repository = $this->models->getRepository(Shop::class);
+
         return $repository->getActiveById($subshopId);
     }
 
     /**
      * Helper method that creates an array of shop information that may be used in the modal box.
+     *
      * @param $subShopIds
+     *
      * @return array
      */
     public function getShopsForModal($subShopIds)
     {
-        $resultArray = array();
+        $resultArray = [];
         foreach ($subShopIds as $subShopId) {
             $model = $this->getShopRepository($subShopId);
             $resultArray[$subShopId] = $model->getName();
@@ -123,8 +126,7 @@ class ShopFinder
      */
     private function getDefaultShopId()
     {
-
-        $default = $this->pluginBootstrap->get("config")->default;
+        $default = $this->pluginConfig['default'];
         if (!is_int($default)) {
             $default = $this->getFirstSubshopId();
         }
@@ -137,20 +139,23 @@ class ShopFinder
      *
      * @param $languages
      * @param $assignedShops
+     *
      * @return bool
      */
     private function getSubShopIdByFullBrowserLanguage($languages, $assignedShops)
     {
         foreach ($languages as $language) {
+            $browserLanguage = strtolower($language);
+
             foreach ($this->subShops as $subshop) {
-                $browserLanguage = strtolower($language);
                 $shopLocale = strtolower($subshop['locale']);
 
                 if ($browserLanguage === $shopLocale && in_array($subshop['id'], $assignedShops)) {
-                    return ($subshop['id']);
+                    return $subshop['id'];
                 }
             }
         }
+
         return false;
     }
 
@@ -159,22 +164,25 @@ class ShopFinder
      *
      * @param $languages
      * @param $assignedShops
+     *
      * @return bool
      */
     private function getSubShopIdByBrowserLanguagePrefix($languages, $assignedShops)
     {
         foreach ($languages as $language) {
+            $browserLanguage = strtolower($language);
+            $currentLanguageArray = explode('-', $browserLanguage);
+            $browserLanguagePrefix = $currentLanguageArray[0];
+
             foreach ($this->subShops as $subshop) {
-                $browserLanguage = strtolower($language);
-                $currentLanguageArray = explode('-', $browserLanguage);
-                $browserLanguagePrefix = $currentLanguageArray[0];
                 $subshopLanguage = $subshop['language'];
 
                 if ($browserLanguagePrefix === $subshopLanguage && in_array($subshop['id'], $assignedShops)) {
-                    return ($subshop['id']);
+                    return $subshop['id'];
                 }
             }
         }
+
         return false;
     }
 
@@ -186,7 +194,7 @@ class ShopFinder
     private function getLanguageShops()
     {
         $data = $this->getData();
-        $subshops = array();
+        $subshops = [];
 
         foreach ($data as $subshop) {
             $subshop['locale'] = strtolower($subshop['locale']['locale']);
@@ -195,24 +203,26 @@ class ShopFinder
             $subshop['language'] = explode('-', $subshop['locale']);
             $subshop['language'] = $subshop['language'][0];
 
-            $subshops[] = array(
+            $subshops[] = [
                 'id' => $subshop['id'],
                 'name' => $subshop['name'],
                 'locale' => $subshop['locale'],
-                'language' => $subshop['language']
-            );
+                'language' => $subshop['language'],
+            ];
         }
+
         return $subshops;
     }
 
     /**
      * Helper function that queries all sub shops (including language sub shops).
+     *
      * @return array
      */
     private function getData()
     {
-        /** @var \Shopware\Models\Shop\Repository $repository */
-        $repository = $this->models->getRepository('Shopware\Models\Shop\Shop');
+        /** @var Repository $repository */
+        $repository = $this->models->getRepository(Shop::class);
         $builder = $repository->getActiveQueryBuilder();
         $builder->orderBy('shop.id');
 

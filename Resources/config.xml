@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../engine/Shopware/Components/Plugin/schema/config.xsd">
+    <elements>
+        <element type="select" required="true" scope="shop">
+            <name>default</name>
+            <label>Fallback shop</label>
+            <label lang="de">Fallback-Sprachshop</label>
+            <description>Forward to this shop if not found any shop languages matching browser language</description>
+            <description lang="de">Auf diesen Shop wird weitergeleitet, wenn kein zu den Browsersprachen passender Shop existiert.</description>
+            <store>base.ShopLanguage</store>
+        </element>
+        <element type="select" required="true" scope="shop">
+            <name>assignedShops</name>
+            <label>Related shops</label>
+            <label lang="de">Zugehörige Shops</label>
+            <description>Forwards to these shops, if the browser language equals the shop language.</description>
+            <description lang="de">Auf diese Shops wird weitergeleitet, wenn die Browsersprache der Shopsprache entspricht.</description>
+            <store>base.ShopLanguage</store>
+            <options>
+                <multiSelect>true</multiSelect>
+            </options>
+        </element>
+        <element type="text" required="true" scope="shop">
+            <name>fallbackLanguage</name>
+            <label>Fallback language for the modal</label>
+            <label lang="de">Fallback-Sprache für Modal</label>
+            <value>en_GB</value>
+            <description>This is the locale for the translation that will be used by default, if no matching translation was found for the user to be displayed in the infobox in the frontend.</description>
+            <description lang="de">Dies ist die locale für die Übersetzung, auf die, wenn keine passende Übersetzung für die vom Benutzer gewählte Sprache existiert, zurückgegriffen wird, um die Infobox im Frontend zu übersetzen.</description>
+        </element>
+        <element type="boolean" required="true" scope="shop">
+            <name>forceBrowserMainLocale</name>
+            <label>Use browser main locale only</label>
+            <label lang="de">Browser-Hauptlokalisierung erzwingen</label>
+            <value>0</value>
+            <description>Additional locales on browser language will be ignored</description>
+            <description lang="de">Zusätzliche Lokalisierungen werden in der Browsersprache ignoriert</description>
+        </element>
+    </elements>
+</config>

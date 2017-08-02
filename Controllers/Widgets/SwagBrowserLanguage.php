@@ -1,77 +1,68 @@
 <?php
 /**
- * Shopware 4.0
- * Copyright © 2012 shopware AG
+ * (c) shopware AG <info@shopware.com>
  *
- * According to our dual licensing model, this program can be used either
- * under the terms of the GNU Affero General Public License, version 3,
- * or under a proprietary license.
- *
- * The texts of the GNU Affero General Public License with an additional
- * permission and of our proprietary license can be found at and
- * in the LICENSE file you have received along with this program.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * "Shopware" is a registered trademark of shopware AG.
- * The licensing of the program under the AGPLv3 does not imply a
- * trademark license. Therefore any rights, title and interest in
- * our trademarks remain entirely with us.
- *
- * @category   Shopware
- * @package    Shopware_Controllers_Frontend_SwagBrowserLanguage
- * @copyright  Copyright (c) 2013, shopware AG (http://www.shopware.de)
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
-use Shopware\SwagBrowserLanguage\Components\ShopFinder;
-use Shopware\SwagBrowserLanguage\Components\Translator;
-use Shopware_Plugins_Frontend_SwagBrowserLanguage_Bootstrap as Bootstrap;
+use Shopware\Components\CSRFWhitelistAware;
+use SwagBrowserLanguage\Components\ShopFinder;
+use SwagBrowserLanguage\Components\Translator;
 
-class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controller_Action
+class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controller_Action implements CSRFWhitelistAware
 {
     /**
-     * @var array $controllerWhiteList
+     * @var array
      */
-    private $controllerWhiteList = array('detail', 'index', 'listing');
+    private $controllerWhiteList = ['detail', 'index', 'listing'];
 
     /**
-     * @var ShopFinder $shopFinder
+     * @var ShopFinder
      */
-    private $shopFinder = null;
-
-    /**
-     * @var Bootstrap $pluginBootstrap
-     */
-    private $pluginBootstrap = null;
+    private $shopFinder;
 
     /**
      * @var Enlight_Components_Session_Namespace
      */
-    private $session = null;
+    private $session;
 
     /**
-     * @var Translator $translator
+     * @var Translator
      */
-    private $translator = null;
+    private $translator;
 
     /**
      * @var \Shopware\Models\Shop\Shop null
      */
-    private $shop = null;
+    private $shop;
+
+    /** @var array */
+    private $config;
+
+    /**
+     * Returns a list with actions which should not be validated for CSRF protection
+     *
+     * @return string[]
+     */
+    public function getWhitelistedCSRFActions()
+    {
+        return [
+            'redirect',
+        ];
+    }
 
     /**
      * This function will be called before the widget is being finalized
      */
     public function preDispatch()
     {
-        $this->pluginBootstrap = $this->get('plugins')->Frontend()->SwagBrowserLanguage();
-        $this->shopFinder = new ShopFinder($this->pluginBootstrap, $this->getModelManager());
-        $this->translator = new Translator($this->pluginBootstrap, $this->getModelManager(), $this->get("snippets"), $this->get("db"));
-        $this->session = $this->get("session");
-        $this->shop = $this->get("shop");
+        $this->shopFinder = $this->get('swag_browser_language.components.shop_finder');
+        $this->translator = $this->get('swag_browser_language.components.translator');
+        $this->session = $this->get('session');
+        $this->shop = $this->get('shop');
+
+        $this->View()->addTemplateDir($this->container->getParameter('swag_browser_language.view_dir'));
 
         parent::preDispatch();
     }
@@ -85,10 +76,11 @@ class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controlle
         $this->get('Front')->Plugins()->ViewRenderer()->setNoRender();
         $request = $this->Request();
 
-        if ($this->session->Bot) {
-            echo json_encode(array(
-                'success' => false
-            ));
+        if ($this->session->get('Bot')) {
+            echo json_encode([
+                'success' => false,
+            ]);
+
             return;
         }
 
@@ -99,16 +91,18 @@ class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controlle
 
         //Does this shop have the browser language already?
         if (in_array($currentLocale, $languages) || in_array($currentLanguage[0], $languages)) {
-            echo json_encode(array(
-                'success' => false
-            ));
+            echo json_encode([
+                'success' => false,
+            ]);
+
             return;
         }
 
         if (!$this->allowRedirect($this->Request()->getPost())) {
-            echo json_encode(array(
-                'success' => false
-            ));
+            echo json_encode([
+                'success' => false,
+            ]);
+
             return;
         }
 
@@ -116,22 +110,50 @@ class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controlle
 
         //If the current shop is the destination shop do not redirect
         if ($this->shop->getId() == $subShopId) {
-            print json_encode(array(
-                'success' => false
-            ));
+            echo json_encode([
+                'success' => false,
+            ]);
+
             return;
         }
 
-        echo json_encode(array(
+        echo json_encode([
             'success' => true,
             'destinationId' => $subShopId,
-        ));
+        ]);
+    }
+
+    /**
+     * This action displays the content of the modal box
+     */
+    public function getModalAction()
+    {
+        $this->get('Front')->Plugins()->ViewRenderer()->setNoRender();
+        $request = $this->Request();
+        $languages = $this->getBrowserLanguages($request);
+        $subShopId = $this->shopFinder->getSubshopId($languages);
+
+        $assignedShops = $this->getPluginConfig()['assignedShops'];
+        $shopsToDisplay = $this->shopFinder->getShopsForModal($assignedShops);
+
+        $snippets = $this->translator->getSnippets($languages);
+
+        $this->View()->assign('snippets', $snippets);
+        $this->View()->assign('shops', $shopsToDisplay);
+        $this->View()->assign('destinationShop', $this->shopFinder->getShopRepository($subShopId)->getName());
+        $this->View()->assign('destinationId', $subShopId);
+
+        echo json_encode([
+            'title' => $snippets['title'],
+            'content' => $this->View()->fetch('widgets/swag_browser_language/get_modal.tpl'),
+        ]);
     }
 
     /**
      * Helper function to get all preferred browser languages
      *
      * @param Enlight_Controller_Request_Request $request
+     *
      * @return array|mixed
      */
     private function getBrowserLanguages(Enlight_Controller_Request_Request $request)
@@ -142,20 +164,29 @@ class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controlle
         if (strpos($languages, ',') == true) {
             $languages = explode(',', $languages);
         } else {
-            $languages = (array)$languages;
+            $languages = (array) $languages;
         }
 
         foreach ($languages as $key => $language) {
             $language = explode(';', $language);
             $languages[$key] = $language[0];
         }
-        return (array)$languages;
+
+        if ($this->getPluginConfig()['forceBrowserMainLocale'] && count($languages) > 2) {
+            $languages = [
+                $languages[0],
+                $languages[1],
+            ];
+        }
+
+        return (array) $languages;
     }
 
     /**
      * Make sure that only useful redirects are performed
      *
      * @param array $params
+     *
      * @return bool
      */
     private function allowRedirect($params)
@@ -174,7 +205,7 @@ class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controlle
         }
 
         // don't redirect payment controllers
-        if ($controllerName == 'payment') {
+        if ($controllerName === 'payment') {
             return false;
         }
 
@@ -182,23 +213,14 @@ class Shopware_Controllers_Widgets_SwagBrowserLanguage extends Enlight_Controlle
     }
 
     /**
-     * This action displays the content of the modal box
+     * @return array|mixed
      */
-    public function getModalAction()
+    private function getPluginConfig()
     {
-        $request = $this->Request();
-        $languages = $this->getBrowserLanguages($request);
-        $subShopId = $this->shopFinder->getSubshopId($languages);
+        if ($this->config === null) {
+            $this->config = $this->get('shopware.plugin.cached_config_reader')->getByPluginName('SwagBrowserLanguage');
+        }
 
-        $assignedShops = $this->pluginBootstrap->Config()->get("assignedShops");
-        $shopsToDisplay = $this->shopFinder->getShopsForModal($assignedShops);
-
-        $snippets = $this->translator->getSnippets($languages);
-
-        $this->View()->loadTemplate('responsive/frontend/plugins/swag_browser_language/modal.tpl');
-        $this->View()->assign("snippets", $snippets);
-        $this->View()->assign("shops", $shopsToDisplay);
-        $this->View()->assign("destinationShop", $this->shopFinder->getShopRepository($subShopId)->getName());
-        $this->View()->assign("destinationId", $subShopId);
+        return $this->config;
     }
 }
