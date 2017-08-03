@@ -42,10 +42,10 @@ class Translator
     private $configReader;
 
     /**
-     * @param ModelManager $models
-     * @param Shopware_Components_Snippet_Manager $snippets
+     * @param ModelManager                            $models
+     * @param Shopware_Components_Snippet_Manager     $snippets
      * @param Enlight_Components_Db_Adapter_Pdo_Mysql $db
-     * @param CachedConfigReader $configReader
+     * @param CachedConfigReader                      $configReader
      */
     public function __construct(
         ModelManager $models,
