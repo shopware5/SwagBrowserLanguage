@@ -12,6 +12,7 @@
             <argument type="service" id="models"/>
             <argument type="service" id="snippets"/>
             <argument type="service" id="db"/>
+            <argument type="service" id="shopware.plugin.cached_config_reader"/>
         </service>
         <service id="swag_browser_language.components.shop_finder" class="SwagBrowserLanguage\Components\ShopFinder">
             <argument type="service" id="models"/>
