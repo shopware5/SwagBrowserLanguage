@@ -11,6 +11,7 @@ namespace SwagBrowserLanguage\Components;
 use Enlight_Components_Db_Adapter_Pdo_Mysql;
 use Enlight_Components_Snippet_Namespace;
 use Shopware\Components\Model\ModelManager;
+use Shopware\Components\Plugin\CachedConfigReader;
 use Shopware\Models\Shop\Locale;
 use Shopware_Components_Snippet_Manager;
 
@@ -36,18 +37,26 @@ class Translator
     private $db;
 
     /**
+     * @var CachedConfigReader
+     */
+    private $configReader;
+
+    /**
      * @param ModelManager                            $models
      * @param Shopware_Components_Snippet_Manager     $snippets
      * @param Enlight_Components_Db_Adapter_Pdo_Mysql $db
+     * @param CachedConfigReader                      $configReader
      */
     public function __construct(
         ModelManager $models,
         Shopware_Components_Snippet_Manager $snippets,
-        Enlight_Components_Db_Adapter_Pdo_Mysql $db
+        Enlight_Components_Db_Adapter_Pdo_Mysql $db,
+        CachedConfigReader $configReader
     ) {
         $this->models = $models;
         $this->snippets = $snippets;
         $this->db = $db;
+        $this->configReader = $configReader;
     }
 
     /**
@@ -123,7 +132,8 @@ class Translator
         }
 
         if (null === $localeId) {
-            $fallbackLocaleCode = $this->pluginBootstrap->get('config')->fallbackLanguage;
+            $config = $this->configReader->getByPluginName('SwagBrowserLanguage');
+            $fallbackLocaleCode = $config['fallbackLanguage'];
             $localeId = $this->getLocaleId($fallbackLocaleCode);
         }
 
