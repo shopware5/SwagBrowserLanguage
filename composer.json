@@ -1,0 +1,13 @@
+{
+  "name":"shopwarelabs/swagbrowserlanguage",
+  "description": "Automated language shop detection",
+  "type": "shopware-plugin",
+  "license": "MIT",
+  "keywords": ["shopware", "browser", "language", "locale-redirection"],
+  "extra": {
+    "installer-name": "SwagBrowserLanguage"
+  },
+  "require": {
+    "composer/installers": "~1.0"
+  }
+}
