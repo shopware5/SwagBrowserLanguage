@@ -171,7 +171,7 @@ class ShopFinder
     {
         foreach ($languages as $language) {
             $browserLanguage = strtolower($language);
-            $currentLanguageArray = explode('-', $browserLanguage);
+            $currentLanguageArray = explode('_', $browserLanguage);
             $browserLanguagePrefix = $currentLanguageArray[0];
 
             foreach ($this->subShops as $subshop) {
